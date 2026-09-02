@@ -1,36 +1,68 @@
+/* =========================================
+   ALGEMEEN
+   ========================================= */
+
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
+}
+
+body {
   background: #f5f6f8;
   font-family: Arial, Helvetica, sans-serif;
   color: #252525;
 }
 
+
+/* =========================================
+   APP LAYOUT
+   ========================================= */
+
 .app-container {
+  width: 100%;
   display: grid;
-  grid-template-columns: 390px minmax(700px, 1fr);
+  grid-template-columns: 390px minmax(760px, 1fr);
   gap: 30px;
   padding: 30px;
 }
 
+
+/* =========================================
+   INVULFORMULIER
+   ========================================= */
+
 .form-panel {
-  background: white;
+  background: #ffffff;
   padding: 28px;
   border-radius: 12px;
   align-self: start;
-  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .form-panel h1 {
-  margin-top: 0;
+  margin: 0 0 8px;
+  font-size: 25px;
+  line-height: 1.2;
 }
 
 .intro {
+  margin: 0 0 25px;
   color: #676879;
+  font-size: 14px;
+  line-height: 1.5;
 }
+
+
+/* =========================================
+   FORMULIER GRID
+   ========================================= */
 
 .form-grid {
   display: grid;
@@ -47,152 +79,363 @@ body {
   grid-column: 1 / -1;
 }
 
+
+/* =========================================
+   LABELS
+   ========================================= */
+
 label {
-  font-size: 13px;
-  font-weight: bold;
   margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #323338;
 }
+
+
+/* =========================================
+   INPUTS
+   ========================================= */
 
 input,
-textarea {
+textarea,
+select {
+  width: 100%;
+
   border: 1px solid #c5c7d0;
   border-radius: 6px;
+
   padding: 10px 12px;
-  font-size: 14px;
+
+  background: #ffffff;
+  color: #323338;
+
   font-family: inherit;
+  font-size: 14px;
 }
 
 textarea {
-  min-height: 80px;
+  min-height: 75px;
   resize: vertical;
 }
 
+select {
+  cursor: pointer;
+}
+
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: 2px solid #ff6545;
   border-color: transparent;
 }
 
+
+/* =========================================
+   AUTOMATISCHE SCHOOLGEGEVENS
+   ========================================= */
+
+.school-info {
+  grid-column: 1 / -1;
+
+  background: #f7f7f7;
+
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+
+  padding: 13px 15px;
+}
+
+.school-info-row {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  gap: 12px;
+
+  padding: 6px 0;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.school-info-row + .school-info-row {
+  border-top: 1px solid #e5e5e5;
+}
+
+.school-info-row span {
+  color: #676879;
+}
+
+.school-info-row strong {
+  color: #323338;
+  font-weight: 600;
+
+  word-break: break-word;
+}
+
+
+/* =========================================
+   KNOPPEN
+   ========================================= */
+
 .buttons {
-  margin-top: 25px;
+  margin-top: 24px;
+
   display: flex;
   gap: 10px;
 }
 
 button {
-  cursor: pointer;
-  border-radius: 6px;
-  padding: 11px 16px;
-  font-weight: bold;
   border: none;
+  border-radius: 6px;
+
+  padding: 11px 16px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.1s ease,
+    opacity 0.1s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:active {
+  transform: translateY(1px);
 }
 
 .primary-button {
   background: #ff6545;
-  color: white;
+  color: #ffffff;
 }
 
 .secondary-button {
-  background: #f0f0f0;
-  color: #333;
+  background: #eeeeee;
+  color: #323338;
 }
 
+
+/* =========================================
+   PDF PREVIEW
+   ========================================= */
+
 .preview-wrapper {
+  width: 100%;
   overflow: auto;
+
+  padding-bottom: 30px;
 }
 
 .pdf-document {
-  background: white;
+  position: relative;
+
   width: 794px;
   min-height: 1123px;
+
   margin: 0 auto;
-  position: relative;
-  padding-bottom: 70px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.10);
+
+  overflow: hidden;
 }
 
-.pdf-header {
-  background:
-    radial-gradient(circle at 20% 100%, rgba(255,101,69,.25), transparent 35%),
-    #202020;
 
-  color: white;
-  min-height: 155px;
-  padding: 36px 66px 28px;
+/* =========================================
+   PDF HEADER
+   ========================================= */
+
+.pdf-header {
+  min-height: 158px;
+
+  padding:
+    34px
+    66px
+    28px;
+
+  color: #ffffff;
+
+  background:
+    radial-gradient(
+      circle at 15% 100%,
+      rgba(255, 101, 69, 0.28),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(255, 101, 69, 0.07),
+      transparent 35%
+    ),
+    #202020;
+}
+
+
+/* =========================================
+   LOGO
+   ========================================= */
+
+.brand {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  width: 190px;
-  max-height: 60px;
+  display: block;
+
+  width: 195px;
+  max-height: 58px;
+
   object-fit: contain;
   object-position: left center;
 }
 
 .fallback-logo {
   display: none;
-  color: white;
+
+  color: #ffffff;
+  line-height: 1;
+}
+
+.fallback-logo strong {
+  display: block;
+
   font-size: 23px;
+  font-weight: 700;
 }
 
 .fallback-logo span {
   display: block;
-  font-size: 10px;
-  letter-spacing: 3px;
+
+  margin-top: 6px;
+
   color: #ff6545;
-  margin-top: 3px;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 3px;
 }
 
+
+/* =========================================
+   PDF TITEL
+   ========================================= */
+
 .pdf-header h2 {
-  margin: 28px 0 0;
-  font-size: 24px;
+  margin: 24px 0 0;
+
+  color: #ffffff;
+
+  font-size: 23px;
+  font-weight: 700;
 }
 
 .pdf-header h2 span {
   color: #ff6545;
 }
 
+
+/* =========================================
+   PDF INHOUD
+   ========================================= */
+
 .pdf-content {
-  padding: 30px 66px 30px;
+  padding:
+    28px
+    66px
+    95px;
 }
 
+
+/* =========================================
+   INTRODUCTIE
+   ========================================= */
+
 .intro-text {
-  font-size: 14px;
-  line-height: 1.5;
+  color: #292929;
+
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.intro-text strong {
+  font-weight: 700;
 }
 
 .intro-text p {
-  margin-top: 5px;
+  margin:
+    5px
+    0
+    0;
 }
+
+
+/* =========================================
+   DETAILS BLOK
+   ========================================= */
 
 .details-box {
   margin-top: 20px;
-  padding: 20px 22px;
-  border: 1px solid #dedede;
-  background: #f6f5f3;
-  border-radius: 12px;
+
+  padding:
+    11px
+    22px
+    16px;
 
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 28px;
+  column-gap: 28px;
+
+  background: #f6f5f3;
+
+  border: 1px solid #dedbd7;
+  border-radius: 11px;
 }
 
+
+/* =========================================
+   LOS DETAIL
+   ========================================= */
+
 .detail {
-  border-bottom: 1px solid #dedede;
-  padding: 10px 0 12px;
-  min-height: 63px;
+  min-height: 65px;
+
+  padding:
+    11px
+    0
+    10px;
+
+  border-bottom: 1px solid #dedbd7;
 }
 
 .detail-label {
-  color: #ff6545;
-  font-size: 10px;
-  letter-spacing: .4px;
-  font-weight: 800;
   margin-bottom: 6px;
+
+  color: #ff6545;
+
+  font-size: 9.5px;
+  font-weight: 800;
+
+  letter-spacing: 0.45px;
 }
 
 .detail-value {
-  font-size: 14px;
-  line-height: 1.35;
+  color: #292929;
+
+  font-size: 13px;
   font-weight: 700;
+
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
 }
 
 .orange-text {
@@ -203,66 +446,125 @@ button {
   border-bottom: none;
 }
 
+
+/* =========================================
+   AFSPRAKEN
+   ========================================= */
+
 .agreements {
-  margin-top: 22px;
+  margin-top: 21px;
 }
 
 .agreements h3 {
   display: inline-block;
-  font-size: 15px;
-  margin: 0 0 10px;
-  border-bottom: 2px solid #ff6545;
+
+  margin:
+    0
+    0
+    8px;
+
   padding-bottom: 3px;
+
+  color: #292929;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  border-bottom: 2px solid #ff6545;
 }
 
 .agreements ul {
-  margin: 3px 0 0;
-  padding-left: 20px;
+  margin:
+    2px
+    0
+    0;
+
+  padding-left: 19px;
 }
 
 .agreements li {
+  margin: 7px 0;
+
   padding-left: 4px;
-  margin: 8px 0;
-  font-size: 12.5px;
-  line-height: 1.4;
+
+  color: #363636;
+
+  font-size: 11.8px;
+  line-height: 1.38;
 }
 
 .agreements li::marker {
   color: #ff6545;
 }
 
+
+/* =========================================
+   AKKOORD BLOK
+   ========================================= */
+
 .approval-box {
-  margin-top: 22px;
-  border-radius: 7px;
-  border: 1px solid #ffcabc;
-  border-left: 10px solid #ff6545;
+  margin-top: 20px;
+
+  padding:
+    14px
+    19px;
+
   background: #fff0ec;
-  padding: 16px 20px;
-  font-size: 13px;
+
+  border:
+    1px
+    solid
+    #ffcabc;
+
+  border-left:
+    10px
+    solid
+    #ff6545;
+
+  border-radius: 7px;
+
+  color: #323232;
+
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
+
+/* =========================================
+   FOOTER
+   ========================================= */
+
 footer {
   position: absolute;
-  bottom: 25px;
+
   left: 66px;
   right: 66px;
+  bottom: 25px;
 
-  border-top: 1px solid #e5e5e5;
-  padding-top: 13px;
+  padding-top: 12px;
 
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
-  color: #999;
-  font-size: 9px;
+  border-top: 1px solid #e4e4e4;
+
+  color: #999999;
+
+  font-size: 8.5px;
 }
 
 footer strong {
-  color: #333;
+  color: #333333;
 }
 
-@media (max-width: 1150px) {
+
+/* =========================================
+   RESPONSIVE VOOR MONDAY VIEW
+   ========================================= */
+
+@media (max-width: 1200px) {
+
   .app-container {
     grid-template-columns: 1fr;
   }
@@ -270,4 +572,35 @@ footer strong {
   .form-panel {
     width: 100%;
   }
+
+  .preview-wrapper {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================
+   KLEINERE SCHERMEN
+   ========================================= */
+
+@media (max-width: 850px) {
+
+  .app-container {
+    padding: 15px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field,
+  .field.full {
+    grid-column: 1;
+  }
+
+  .school-info {
+    grid-column: 1;
+  }
+
 }
