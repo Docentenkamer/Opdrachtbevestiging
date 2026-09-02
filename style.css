@@ -604,3 +604,75 @@ footer strong {
   }
 
 }
+/* =========================================
+   SCHOOL ZOEKEN
+   ========================================= */
+
+.school-search-wrapper {
+  position: relative;
+}
+
+.school-results {
+  display: none;
+
+  position: absolute;
+  z-index: 1000;
+
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+
+  max-height: 280px;
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #c5c7d0;
+  border-radius: 7px;
+
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+.school-results.visible {
+  display: block;
+}
+
+.school-result {
+  padding: 11px 13px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  border-bottom: 1px solid #eeeeee;
+}
+
+.school-result:last-child {
+  border-bottom: none;
+}
+
+.school-result:hover {
+  background: #f5f6f8;
+}
+
+.school-result-name {
+  font-weight: 600;
+  color: #323338;
+}
+
+.school-result-address {
+  margin-top: 3px;
+
+  color: #676879;
+
+  font-size: 12px;
+}
+
+.school-no-results {
+  padding: 12px 13px;
+
+  color: #676879;
+
+  font-size: 13px;
+}
