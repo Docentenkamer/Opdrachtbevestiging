@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Opdrachtbevestiging | Invalkamer</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+  <section class="form-panel">
+    <h1>Opdrachtbevestiging</h1>
+    <p class="intro">
+      Vul hieronder de gegevens van de invalopdracht in.
+    </p>
+
+    <div class="form-grid">
+
+      <div class="field">
+        <label for="naam">Naam leerkracht</label>
+        <input id="naam" type="text" placeholder="Bijv. Mohammed">
+      </div>
+
+      <div class="field">
+        <label for="functie">Functie</label>
+        <textarea id="functie" placeholder="Bijv. Leerkracht groep 4"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="school">School</label>
+        <input id="school" type="text" placeholder="Bijv. Basisschool De Regenboog">
+      </div>
+
+      <div class="field">
+        <label for="plaats">Plaats</label>
+        <input id="plaats" type="text" placeholder="Bijv. Barendrecht">
+      </div>
+
+      <div class="field full">
+        <label for="adres">Adres</label>
+        <input id="adres" type="text" placeholder="Straat 123, 1234 AB, Plaats">
+      </div>
+
+      <div class="field full">
+        <label for="datum">Datum / data</label>
+        <input id="datum" type="text" placeholder="Bijv. 15/09, 16/09, 17/09">
+      </div>
+
+      <div class="field">
+        <label for="starttijd">Starttijd</label>
+        <input id="starttijd" type="time">
+      </div>
+
+      <div class="field">
+        <label for="eindtijd">Eindtijd</label>
+        <input id="eindtijd" type="time">
+      </div>
+
+      <div class="field">
+        <label for="uren">Declarabele uren per dag</label>
+        <input id="uren" type="text" placeholder="Bijv. 6,5">
+      </div>
+
+      <div class="field">
+        <label for="tarief">Uurtarief excl. btw</label>
+        <input id="tarief" type="text" placeholder="Bijv. 48,50">
+      </div>
+
+      <div class="field">
+        <label for="contactpersoon">Contactpersoon school</label>
+        <input id="contactpersoon" type="text" placeholder="Bijv. Fatima Yildiz">
+      </div>
+
+      <div class="field">
+        <label for="website">Website school</label>
+        <input id="website" type="url" placeholder="https://...">
+      </div>
+
+    </div>
+
+    <div class="buttons">
+      <button class="secondary-button" onclick="updatePreview()">
+        Voorbeeld bijwerken
+      </button>
+
+      <button class="primary-button" onclick="downloadPDF()">
+        Download PDF
+      </button>
+    </div>
+  </section>
+
+
+  <section class="preview-wrapper">
+
+    <div id="pdf-document" class="pdf-document">
+
+      <header class="pdf-header">
+
+        <div class="brand">
+          <img src="logo.png"
+               class="logo"
+               alt="Docentenkamer"
+               onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
+
+          <div id="fallbackLogo" class="fallback-logo">
+            <strong>Docentenkamer</strong>
+            <span>INVALKAMER</span>
+          </div>
+        </div>
+
+        <h2>
+          Bevestiging <span>invalopdracht</span>
+        </h2>
+
+      </header>
+
+
+      <main class="pdf-content">
+
+        <div class="intro-text">
+          <strong>Beste <span id="p-naam">Mohammed</span>,</strong>
+
+          <p>
+            Hierbij bevestigen wij de invalopdracht bij
+            <span id="p-school-intro">Basisschool De Regenboog</span>
+            in
+            <span id="p-plaats">Barendrecht</span>.
+          </p>
+        </div>
+
+
+        <div class="details-box">
+
+          <div class="detail">
+            <div class="detail-label">■ FUNCTIE</div>
+            <div id="p-functie" class="detail-value">
+              Leerkracht
+            </div>
+          </div>
+
+          <div class="detail">
+            <div class="detail-label">● SCHOOL</div>
+            <div id="p-school" class="detail-value">
+              Basisschool De Regenboog
+            </div>
+          </div>
+
+
+          <div class="detail">
+            <div class="detail-label">● ADRES</div>
+            <div id="p-adres" class="detail-value">
+              -
+            </div>
+          </div>
+
+          <div class="detail">
+            <div class="detail-label">□ DATUM</div>
+            <div id="p-datum" class="detail-value">
+              -
+            </div>
+          </div>
+
+
+          <div class="detail">
+            <div class="detail-label">● WERKTIJDEN</div>
+            <div id="p-werktijden" class="detail-value">
+              -
+            </div>
+          </div>
+
+          <div class="detail">
+            <div class="detail-label">▣ DECLARABELE UREN PER DAG</div>
+            <div id="p-uren" class="detail-value">
+              -
+            </div>
+          </div>
+
+
+          <div class="detail">
+            <div class="detail-label">● UURTARIEF</div>
+            <div id="p-tarief" class="detail-value">
+              -
+            </div>
+          </div>
+
+          <div class="detail">
+            <div class="detail-label">● CONTACTPERSOON SCHOOL</div>
+            <div id="p-contactpersoon" class="detail-value">
+              -
+            </div>
+          </div>
+
+
+          <div class="detail website-detail">
+            <div class="detail-label">◎ WEBSITE</div>
+            <div id="p-website" class="detail-value orange-text">
+              -
+            </div>
+          </div>
+
+        </div>
+
+
+        <section class="agreements">
+
+          <h3>Afspraken bij deze opdracht</h3>
+
+          <ul>
+            <li>
+              We verwachten dat je uiterlijk 10 minuten voor aanvang aanwezig bent op locatie.
+            </li>
+
+            <li>
+              Ben je verhinderd of vertraagd? Neem dan zo snel mogelijk contact op met de Invalkamer via 06 34938957.
+            </li>
+
+            <li>
+              Wijzigingen in de opdracht, uren of inzet graag altijd afstemmen met de Invalkamer.
+            </li>
+
+            <li>
+              Financiële afspraken en onderhandelingen over tarieven verlopen uitsluitend via de Docentenkamer en niet rechtstreeks met de school.
+            </li>
+          </ul>
+
+        </section>
+
+
+        <div class="approval-box">
+          Wil je deze opdracht bevestigen door op dit bericht te reageren met
+          <strong>“Akkoord”</strong>?<br>
+          Alvast veel succes!
+        </div>
+
+      </main>
+
+
+      <footer>
+        <div>
+          <strong>Docentenkamer</strong>
+          <span> | Invalkamer</span>
+        </div>
+
+        <div>
+          Opdrachtbevestiging ·
+          <span id="p-vandaag"></span>
+        </div>
+      </footer>
+
+    </div>
+
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
