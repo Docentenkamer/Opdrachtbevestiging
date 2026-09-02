@@ -14,12 +14,7 @@ body {
 
 body {
   background: #f5f6f8;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   color: #252525;
 }
 
@@ -30,15 +25,9 @@ body {
 
 .app-container {
   width: 100%;
-
   display: grid;
-
-  grid-template-columns:
-    390px
-    minmax(760px, 1fr);
-
+  grid-template-columns: 390px minmax(760px, 1fr);
   gap: 30px;
-
   padding: 30px;
 }
 
@@ -49,60 +38,40 @@ body {
 
 .form-panel {
   background: #ffffff;
-
   padding: 28px;
-
   border-radius: 12px;
-
   align-self: start;
 
   box-shadow:
-    0 2px 12px
-    rgba(0, 0, 0, 0.08);
+    0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .form-panel h1 {
-  margin:
-    0
-    0
-    8px;
-
+  margin: 0 0 8px;
   font-size: 25px;
-
   line-height: 1.2;
 }
 
 .intro {
-  margin:
-    0
-    0
-    25px;
-
+  margin: 0 0 25px;
   color: #676879;
-
   font-size: 14px;
-
   line-height: 1.5;
 }
 
 
 /* =========================================
-   FORMULIER GRID
+   FORMULIER
    ========================================= */
 
 .form-grid {
   display: grid;
-
-  grid-template-columns:
-    1fr
-    1fr;
-
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
 .field {
   display: flex;
-
   flex-direction: column;
 }
 
@@ -110,18 +79,10 @@ body {
   grid-column: 1 / -1;
 }
 
-
-/* =========================================
-   LABELS
-   ========================================= */
-
 label {
   margin-bottom: 6px;
-
   font-size: 13px;
-
   font-weight: 700;
-
   color: #323338;
 }
 
@@ -134,91 +95,51 @@ input,
 textarea,
 select {
   width: 100%;
-
-  border:
-    1px
-    solid
-    #c5c7d0;
-
+  border: 1px solid #c5c7d0;
   border-radius: 6px;
-
-  padding:
-    10px
-    12px;
-
+  padding: 10px 12px;
   background: #ffffff;
-
   color: #323338;
-
   font-family: inherit;
-
   font-size: 14px;
 }
 
 textarea {
   min-height: 75px;
-
   resize: vertical;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  outline:
-    2px
-    solid
-    #ff6545;
-
+  outline: 2px solid #ff6545;
   border-color: transparent;
 }
 
 
 /* =========================================
-   AUTOMATISCHE SCHOOLGEGEVENS
+   SCHOOLGEGEVENS
    ========================================= */
 
 .school-info {
   grid-column: 1 / -1;
-
   background: #f7f7f7;
-
-  border:
-    1px
-    solid
-    #e2e2e2;
-
+  border: 1px solid #e2e2e2;
   border-radius: 8px;
-
-  padding:
-    13px
-    15px;
+  padding: 13px 15px;
 }
 
 .school-info-row {
   display: grid;
-
-  grid-template-columns:
-    105px
-    1fr;
-
+  grid-template-columns: 105px 1fr;
   gap: 12px;
-
-  padding:
-    6px
-    0;
-
+  padding: 6px 0;
   font-size: 13px;
-
   line-height: 1.4;
 }
 
-.school-info-row
-+
-.school-info-row {
-  border-top:
-    1px
-    solid
-    #e5e5e5;
+.school-info-row + .school-info-row {
+  border-top: 1px solid #e5e5e5;
 }
 
 .school-info-row span {
@@ -227,9 +148,7 @@ select:focus {
 
 .school-info-row strong {
   color: #323338;
-
   font-weight: 600;
-
   word-break: break-word;
 }
 
@@ -240,27 +159,17 @@ select:focus {
 
 .buttons {
   margin-top: 24px;
-
   display: flex;
-
   gap: 10px;
 }
 
 button {
   border: none;
-
   border-radius: 6px;
-
-  padding:
-    11px
-    16px;
-
+  padding: 11px 16px;
   font-family: inherit;
-
   font-size: 14px;
-
   font-weight: 700;
-
   cursor: pointer;
 
   transition:
@@ -273,19 +182,16 @@ button:hover {
 }
 
 button:active {
-  transform:
-    translateY(1px);
+  transform: translateY(1px);
 }
 
 .primary-button {
   background: #ff6545;
-
   color: #ffffff;
 }
 
 .secondary-button {
   background: #eeeeee;
-
   color: #323338;
 }
 
@@ -296,26 +202,19 @@ button:active {
 
 .preview-wrapper {
   width: 100%;
-
   overflow: auto;
-
   padding-bottom: 30px;
 }
 
 .pdf-document {
   position: relative;
-
   width: 794px;
-
   min-height: 1123px;
-
   margin: 0 auto;
-
   background: #ffffff;
 
   box-shadow:
-    0 2px 16px
-    rgba(0, 0, 0, 0.10);
+    0 2px 16px rgba(0, 0, 0, 0.10);
 
   overflow: hidden;
 }
@@ -327,11 +226,7 @@ button:active {
 
 .pdf-header {
   min-height: 158px;
-
-  padding:
-    34px
-    66px
-    28px;
+  padding: 34px 66px 28px;
 
   color: #ffffff;
 
@@ -356,53 +251,36 @@ button:active {
 
 .brand {
   min-height: 42px;
-
   display: flex;
-
   align-items: center;
 }
 
 .logo {
   display: block;
-
   width: 195px;
-
   max-height: 58px;
-
   object-fit: contain;
-
-  object-position:
-    left
-    center;
+  object-position: left center;
 }
 
 .fallback-logo {
   display: none;
-
   color: #ffffff;
-
   line-height: 1;
 }
 
 .fallback-logo strong {
   display: block;
-
   font-size: 23px;
-
   font-weight: 700;
 }
 
 .fallback-logo span {
   display: block;
-
   margin-top: 6px;
-
   color: #ff6545;
-
   font-size: 9px;
-
   font-weight: 700;
-
   letter-spacing: 3px;
 }
 
@@ -412,15 +290,9 @@ button:active {
    ========================================= */
 
 .pdf-header h2 {
-  margin:
-    24px
-    0
-    0;
-
+  margin: 24px 0 0;
   color: #ffffff;
-
   font-size: 23px;
-
   font-weight: 700;
 }
 
@@ -434,10 +306,7 @@ button:active {
    ========================================= */
 
 .pdf-content {
-  padding:
-    28px
-    66px
-    95px;
+  padding: 28px 66px 95px;
 }
 
 
@@ -447,9 +316,7 @@ button:active {
 
 .intro-text {
   color: #292929;
-
   font-size: 13.5px;
-
   line-height: 1.45;
 }
 
@@ -458,10 +325,7 @@ button:active {
 }
 
 .intro-text p {
-  margin:
-    5px
-    0
-    0;
+  margin: 5px 0 0;
 }
 
 
@@ -478,29 +342,22 @@ button:active {
     16px;
 
   display: grid;
-
-  grid-template-columns:
-    1fr
-    1fr;
-
+  grid-template-columns: 1fr 1fr;
   column-gap: 28px;
 
   background: #f6f5f3;
 
-  border:
-    1px
-    solid
-    #dedbd7;
-
+  border: 1px solid #dedbd7;
   border-radius: 11px;
 }
 
 
 /* =========================================
-   LOS DETAIL
+   DETAILRIJ
    ========================================= */
 
 .detail {
+  min-width: 0;
   min-height: 65px;
 
   padding:
@@ -508,83 +365,115 @@ button:active {
     0
     10px;
 
-  border-bottom:
-    1px
-    solid
-    #dedbd7;
+  border-bottom: 1px solid #dedbd7;
 }
 
 
 /* =========================================
-   DETAIL LABEL + ICOON
+   DETAIL LABEL
    ========================================= */
 
 .detail-label {
-  min-height: 15px;
+  height: 15px !important;
+  min-height: 15px !important;
+  max-height: 15px !important;
 
   margin-bottom: 6px;
 
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 
-  align-items: center;
-
-  gap: 6px;
+  gap: 5px;
 
   color: #ff6545;
 
   font-size: 9.5px;
-
   font-weight: 800;
 
   letter-spacing: 0.45px;
-
   line-height: 1;
-}
-
-.detail-label span {
-  display: inline-block;
-
-  padding-top: 1px;
-}
-
-
-/* =========================================
-   ORANJE LIJNICONEN
-   ========================================= */
-
-.detail-icon {
-  width: 13px;
-
-  height: 13px;
-
-  flex:
-    0
-    0
-    13px;
-
-  fill: none;
-
-  stroke: #ff6545;
-
-  stroke-width: 1.8;
-
-  stroke-linecap: round;
-
-  stroke-linejoin: round;
 
   overflow: visible;
 }
 
+.detail-label span {
+  display: inline-block;
+  line-height: 13px;
+}
+
 
 /* =========================================
-   DETAIL WAARDEN
+   ICOONTJES
+
+   Heel bewust streng ingesteld zodat SVG
+   nooit zijn standaardformaat kan aannemen.
+   ========================================= */
+
+svg.detail-icon,
+.detail-label svg {
+  display: block !important;
+
+  width: 12px !important;
+  height: 12px !important;
+
+  min-width: 12px !important;
+  min-height: 12px !important;
+
+  max-width: 12px !important;
+  max-height: 12px !important;
+
+  flex:
+    0
+    0
+    12px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  fill: none !important;
+
+  stroke: #ff6545 !important;
+  stroke-width: 1.8 !important;
+
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+
+  vertical-align: middle !important;
+
+  overflow: visible !important;
+}
+
+
+/* Alle vormen binnen de icoontjes */
+
+.detail-icon path,
+.detail-icon rect,
+.detail-icon circle,
+.detail-icon line,
+.detail-icon polyline,
+.detail-icon polygon {
+
+  fill: none !important;
+
+  stroke: #ff6545 !important;
+
+  stroke-width: 1.8 !important;
+
+  stroke-linecap: round !important;
+
+  stroke-linejoin: round !important;
+}
+
+
+/* =========================================
+   DETAILWAARDEN
    ========================================= */
 
 .detail-value {
   color: #292929;
 
   font-size: 13px;
-
   font-weight: 700;
 
   line-height: 1.35;
@@ -612,45 +501,30 @@ button:active {
 .agreements h3 {
   display: inline-block;
 
-  margin:
-    0
-    0
-    8px;
+  margin: 0 0 8px;
 
   padding-bottom: 3px;
 
   color: #292929;
 
   font-size: 14px;
-
   font-weight: 700;
 
-  border-bottom:
-    2px
-    solid
-    #ff6545;
+  border-bottom: 2px solid #ff6545;
 }
 
 .agreements ul {
-  margin:
-    2px
-    0
-    0;
-
+  margin: 2px 0 0;
   padding-left: 19px;
 }
 
 .agreements li {
-  margin:
-    7px
-    0;
-
+  margin: 7px 0;
   padding-left: 4px;
 
   color: #363636;
 
   font-size: 11.8px;
-
   line-height: 1.38;
 }
 
@@ -660,7 +534,7 @@ button:active {
 
 
 /* =========================================
-   AKKOORD BLOK
+   AKKOORDBLOK
    ========================================= */
 
 .approval-box {
@@ -672,22 +546,14 @@ button:active {
 
   background: #fff0ec;
 
-  border:
-    1px
-    solid
-    #ffcabc;
-
-  border-left:
-    10px
-    solid
-    #ff6545;
+  border: 1px solid #ffcabc;
+  border-left: 10px solid #ff6545;
 
   border-radius: 7px;
 
   color: #323232;
 
   font-size: 12.5px;
-
   line-height: 1.5;
 }
 
@@ -700,23 +566,16 @@ footer {
   position: absolute;
 
   left: 66px;
-
   right: 66px;
-
   bottom: 25px;
 
   padding-top: 12px;
 
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
 
-  border-top:
-    1px
-    solid
-    #e4e4e4;
+  border-top: 1px solid #e4e4e4;
 
   color: #999999;
 
@@ -729,7 +588,7 @@ footer strong {
 
 
 /* =========================================
-   RESPONSIVE VOOR MONDAY VIEW
+   RESPONSIVE
    ========================================= */
 
 @media (max-width: 1200px) {
@@ -745,13 +604,8 @@ footer strong {
   .preview-wrapper {
     width: 100%;
   }
-
 }
 
-
-/* =========================================
-   KLEINERE SCHERMEN
-   ========================================= */
 
 @media (max-width: 850px) {
 
@@ -771,5 +625,4 @@ footer strong {
   .school-info {
     grid-column: 1;
   }
-
 }
