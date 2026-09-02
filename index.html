@@ -79,21 +79,29 @@
 
         <!-- SCHOOL -->
 
-        <div class="field full">
+        <div class="field full school-search-field">
 
-          <label for="school">
-            School
-          </label>
+  <label for="school-search">
+    School
+  </label>
 
-          <select id="school">
+  <div class="school-search-wrapper">
 
-            <option value="">
-              Scholen laden...
-            </option>
+    <input
+      id="school-search"
+      type="text"
+      autocomplete="off"
+      placeholder="Typ de naam van een school..."
+    >
 
-          </select>
+    <div
+      id="school-results"
+      class="school-results"
+    ></div>
 
-        </div>
+  </div>
+
+</div>
 
 
         <!-- AUTOMATISCHE SCHOOLGEGEVENS -->
