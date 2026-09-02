@@ -15,22 +15,20 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- monday.com SDK -->
-<script src="https://cdn.jsdelivr.net/npm/monday-sdk-js@0.5.9/dist/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/monday-sdk-js@0.5.9/dist/main.js"></script>
 
   <!-- PDF genereren -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </head>
 
-
 <body>
 
   <div class="app-container">
 
-
-    <!-- ========================= -->
-    <!-- INVULFORMULIER -->
-    <!-- ========================= -->
+    <!-- =====================================================
+         INVULFORMULIER
+         ===================================================== -->
 
     <section class="form-panel">
 
@@ -40,11 +38,10 @@
         Vul hieronder de gegevens van de invalopdracht in.
       </p>
 
-
       <div class="form-grid">
 
 
-        <!-- NAAM -->
+        <!-- NAAM LEERKRACHT -->
 
         <div class="field full">
 
@@ -77,34 +74,28 @@
         </div>
 
 
-        <!-- SCHOOL -->
+        <!-- SCHOOL ZOEKEN -->
 
-        <div class="field full school-search-field">
+        <div class="field full">
 
-  <label for="school-search">
-    School
-  </label>
+          <label for="school-search">
+            School
+          </label>
 
-  <div class="school-search-wrapper">
+          <input
+            id="school-search"
+            type="text"
+            list="schools-list"
+            autocomplete="off"
+            placeholder="Scholen laden..."
+          >
 
-    <input
-      id="school-search"
-      type="text"
-      autocomplete="off"
-      placeholder="Typ de naam van een school..."
-    >
+          <datalist id="schools-list"></datalist>
 
-    <div
-      id="school-results"
-      class="school-results"
-    ></div>
-
-  </div>
-
-</div>
+        </div>
 
 
-        <!-- AUTOMATISCHE SCHOOLGEGEVENS -->
+        <!-- AUTOMATISCH GELADEN SCHOOLGEGEVENS -->
 
         <div
           id="school-info"
@@ -152,7 +143,7 @@
         </div>
 
 
-        <!-- DATUM -->
+        <!-- DATUM / DATA -->
 
         <div class="field full">
 
@@ -201,7 +192,7 @@
         </div>
 
 
-        <!-- UREN -->
+        <!-- DECLARABELE UREN -->
 
         <div class="field">
 
@@ -218,7 +209,7 @@
         </div>
 
 
-        <!-- TARIEF -->
+        <!-- UURTARIEF -->
 
         <div class="field">
 
@@ -263,24 +254,20 @@
     </section>
 
 
-
-    <!-- ========================= -->
-    <!-- PDF VOORBEELD -->
-    <!-- ========================= -->
+    <!-- =====================================================
+         PDF VOORBEELD
+         ===================================================== -->
 
     <section class="preview-wrapper">
-
 
       <div
         id="pdf-document"
         class="pdf-document"
       >
 
-
         <!-- HEADER -->
 
         <header class="pdf-header">
-
 
           <div class="brand">
 
@@ -293,7 +280,6 @@
                 document.getElementById('fallbackLogo').style.display='block';
               "
             >
-
 
             <div
               id="fallbackLogo"
@@ -323,8 +309,9 @@
         </header>
 
 
-
-        <!-- INHOUD PDF -->
+        <!-- =================================================
+             PDF INHOUD
+             ================================================= -->
 
         <main class="pdf-content">
 
@@ -339,7 +326,6 @@
                 ...
               </span>,
             </strong>
-
 
             <p>
 
@@ -360,8 +346,9 @@
           </div>
 
 
-
-          <!-- GEGEVENSBLOK -->
+          <!-- =================================================
+               OPDRACHTGEGEVENS
+               ================================================= -->
 
           <div class="details-box">
 
@@ -527,62 +514,49 @@
 
             </div>
 
-
           </div>
 
 
-
-          <!-- AFSPRAKEN -->
+          <!-- =================================================
+               AFSPRAKEN
+               ================================================= -->
 
           <section class="agreements">
-
 
             <h3>
               Afspraken bij deze opdracht
             </h3>
 
-
             <ul>
 
               <li>
-                We verwachten dat je uiterlijk 10 minuten
-                voor aanvang aanwezig bent op locatie.
+                We verwachten dat je uiterlijk 10 minuten voor aanvang aanwezig bent op locatie.
               </li>
 
-
               <li>
-                Ben je verhinderd of vertraagd?
-                Neem dan zo snel mogelijk contact op met
-                de Invalkamer via 06 34938957.
+                Ben je verhinderd of vertraagd? Neem dan zo snel mogelijk contact op met de Invalkamer via 06 34938957.
               </li>
 
-
               <li>
-                Wijzigingen in de opdracht, uren of inzet
-                graag altijd afstemmen met de Invalkamer.
+                Wijzigingen in de opdracht, uren of inzet graag altijd afstemmen met de Invalkamer.
               </li>
 
-
               <li>
-                Financiële afspraken en onderhandelingen
-                over tarieven verlopen uitsluitend via de
-                Docentenkamer en niet rechtstreeks met
-                de school.
+                Financiële afspraken en onderhandelingen over tarieven verlopen uitsluitend via de Docentenkamer en niet rechtstreeks met de school.
               </li>
 
             </ul>
 
-
           </section>
 
 
-
-          <!-- AKKOORD -->
+          <!-- =================================================
+               AKKOORD
+               ================================================= -->
 
           <div class="approval-box">
 
-            Wil je deze opdracht bevestigen door op dit
-            bericht te reageren met
+            Wil je deze opdracht bevestigen door op dit bericht te reageren met
 
             <strong>
               “Akkoord”
@@ -594,15 +568,14 @@
 
           </div>
 
-
         </main>
 
 
-
-        <!-- FOOTER -->
+        <!-- =================================================
+             FOOTER
+             ================================================= -->
 
         <footer>
-
 
           <div>
 
@@ -625,9 +598,7 @@
 
           </div>
 
-
         </footer>
-
 
       </div>
 
@@ -636,7 +607,7 @@
   </div>
 
 
-  <!-- Onze eigen JavaScript -->
+  <!-- Eigen JavaScript -->
   <script src="app.js"></script>
 
 </body>
