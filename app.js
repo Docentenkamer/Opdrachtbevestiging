@@ -64,29 +64,7 @@ function formatTarief(value) {
 
 
 /* =========================================================
-   WEBSITE OPMAKEN
-   ========================================================= */
-
-function formatWebsite(value) {
-
-  if (!value) {
-    return "";
-  }
-
-  return value.trim();
-}
-
-
-/* =========================================================
    PLAATS UIT ADRES HALEN
-
-   Bijvoorbeeld:
-
-   Erasmusplein 1, 3132 EL, Vlaardingen
-
-   wordt:
-
-   Vlaardingen
    ========================================================= */
 
 function extractPlace(address) {
@@ -95,15 +73,14 @@ function extractPlace(address) {
     return "";
   }
 
-
   /*
-   Probeer eerst een Nederlands postcodepatroon.
+   Voorbeeld:
+   Erasmusplein 1, 3132 EL, Vlaardingen
    */
 
   const postcodeMatch = address.match(
     /\b\d{4}\s?[A-Z]{2}\s*,?\s*(.+)$/i
   );
-
 
   if (
     postcodeMatch &&
@@ -116,10 +93,9 @@ function extractPlace(address) {
 
   }
 
-
   /*
-   Als dat niet lukt:
-   pak het laatste gedeelte na een komma.
+   Fallback:
+   laatste gedeelte na een komma.
    */
 
   const parts = address
@@ -127,18 +103,16 @@ function extractPlace(address) {
     .map(part => part.trim())
     .filter(Boolean);
 
-
   if (parts.length > 1) {
     return parts[parts.length - 1];
   }
-
 
   return "";
 }
 
 
 /* =========================================================
-   COLUMN VALUES OMZETTEN NAAR OBJECT
+   MONDAY COLUMN VALUES OMZETTEN
    ========================================================= */
 
 function mapColumnValues(columnValues) {
@@ -146,9 +120,7 @@ function mapColumnValues(columnValues) {
   const mapped = {};
 
   columnValues.forEach(column => {
-
     mapped[column.id] = column;
-
   });
 
   return mapped;
@@ -156,7 +128,7 @@ function mapColumnValues(columnValues) {
 
 
 /* =========================================================
-   WAARDE UIT MONDAY-KOLOM HALEN
+   TEKST UIT MONDAY-KOLOM HALEN
    ========================================================= */
 
 function getColumnText(column) {
@@ -172,17 +144,11 @@ function getColumnText(column) {
     return column.text.trim();
   }
 
-
-  /*
-   Fallback wanneer monday geen text teruggeeft.
-   */
-
   if (column.value) {
 
     try {
 
       const parsed = JSON.parse(column.value);
-
 
       /*
        Location-kolom
@@ -192,7 +158,6 @@ function getColumnText(column) {
         return parsed.address;
       }
 
-
       /*
        Link-kolom
        */
@@ -201,9 +166,8 @@ function getColumnText(column) {
         return parsed.url;
       }
 
-
       /*
-       Tekstwaarde
+       Tekst
        */
 
       if (parsed.text) {
@@ -211,11 +175,6 @@ function getColumnText(column) {
       }
 
     } catch (error) {
-
-      /*
-       Als de waarde geen JSON is,
-       gebruiken we hem rechtstreeks.
-       */
 
       if (typeof column.value === "string") {
 
@@ -228,7 +187,6 @@ function getColumnText(column) {
     }
 
   }
-
 
   return "";
 }
@@ -244,12 +202,6 @@ function getWebsite(column) {
     return "";
   }
 
-
-  /*
-   Eerst proberen we de URL uit de
-   raw monday value te halen.
-   */
-
   if (column.value) {
 
     try {
@@ -261,15 +213,14 @@ function getWebsite(column) {
       }
 
     } catch (error) {
-      // Geen probleem: hieronder gebruiken we text.
+      // Geen probleem.
     }
 
   }
 
-
-  return formatWebsite(
-    column.text || ""
-  );
+  return column.text
+    ? column.text.trim()
+    : "";
 }
 
 
@@ -279,21 +230,21 @@ function getWebsite(column) {
 
 async function loadSchools() {
 
-  const schoolSelect =
-    document.getElementById("school");
+  const searchInput =
+    document.getElementById("school-search");
 
+  if (!searchInput) {
+    console.error(
+      "School zoekveld niet gevonden in index.html"
+    );
+    return;
+  }
 
-  schoolSelect.innerHTML = `
-    <option value="">
-      Scholen laden...
-    </option>
-  `;
+  searchInput.placeholder =
+    "Scholen laden...";
 
+  searchInput.disabled = true;
 
-  /*
-   We vragen alleen de gegevens op die
-   nodig zijn voor de opdrachtbevestiging.
-   */
 
   const query = `
     query {
@@ -335,10 +286,6 @@ async function loadSchools() {
       await monday.api(query);
 
 
-    /*
-     Foutmelding vanuit monday / GraphQL.
-     */
-
     if (
       response.errors &&
       response.errors.length > 0
@@ -364,11 +311,6 @@ async function loadSchools() {
         ?.items_page
         ?.items || [];
 
-
-    /*
-     Monday-items omzetten naar een
-     eenvoudiger scholenobject.
-     */
 
     schools = items.map(item => {
 
@@ -422,12 +364,14 @@ async function loadSchools() {
 
 
     /*
-     Lege schoolnamen eruit halen.
+     Items zonder naam verwijderen.
      */
 
     schools =
       schools.filter(
-        school => school.name
+        school =>
+          school.name &&
+          school.name.trim()
       );
 
 
@@ -447,53 +391,10 @@ async function loadSchools() {
     );
 
 
-    /*
-     Dropdown leegmaken en opnieuw vullen.
-     */
+    searchInput.disabled = false;
 
-    schoolSelect.innerHTML = `
-      <option value="">
-        Selecteer een school...
-      </option>
-    `;
-
-
-    schools.forEach(school => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        school.id;
-
-
-      option.textContent =
-        school.name;
-
-
-      schoolSelect.appendChild(
-        option
-      );
-
-    });
-
-
-    /*
-     Geen scholen gevonden?
-     */
-
-    if (schools.length === 0) {
-
-      schoolSelect.innerHTML = `
-        <option value="">
-          Geen scholen gevonden
-        </option>
-      `;
-
-    }
+    searchInput.placeholder =
+      "Typ de naam van een school...";
 
 
     console.log(
@@ -510,26 +411,10 @@ async function loadSchools() {
     );
 
 
-    schoolSelect.innerHTML = `
-      <option value="">
-        Scholen konden niet worden geladen
-      </option>
-    `;
+    searchInput.disabled = true;
 
-
-    document.getElementById(
-      "school-adres"
-    ).textContent = "—";
-
-
-    document.getElementById(
-      "school-contactpersoon"
-    ).textContent = "—";
-
-
-    document.getElementById(
-      "school-website"
-    ).textContent = "—";
+    searchInput.placeholder =
+      "Scholen konden niet worden geladen";
 
   }
 
@@ -537,32 +422,269 @@ async function loadSchools() {
 
 
 /* =========================================================
-   SCHOOL GESELECTEERD
+   SCHOOL ZOEKRESULTATEN TONEN
    ========================================================= */
 
-function handleSchoolChange() {
+function showSchoolResults(searchTerm = "") {
 
-  const schoolId =
-    document
-      .getElementById("school")
-      .value;
-
-
-  selectedSchool =
-    schools.find(
-      school =>
-        school.id === schoolId
-    ) || null;
+  const resultsContainer =
+    document.getElementById(
+      "school-results"
+    );
 
 
-  updateSchoolInfo();
+  if (!resultsContainer) {
+    return;
+  }
 
-  updatePreview();
+
+  const term =
+    searchTerm
+      .trim()
+      .toLowerCase();
+
+
+  /*
+   Zoeken op:
+   - schoolnaam
+   - adres
+   - plaats
+   */
+
+  let matches =
+    schools.filter(school => {
+
+      const searchableText = `
+        ${school.name}
+        ${school.address}
+        ${school.place}
+      `.toLowerCase();
+
+      return searchableText.includes(term);
+
+    });
+
+
+  /*
+   Maximaal 10 resultaten tegelijk.
+   */
+
+  matches =
+    matches.slice(0, 10);
+
+
+  resultsContainer.innerHTML = "";
+
+
+  if (matches.length === 0) {
+
+    const noResults =
+      document.createElement("div");
+
+    noResults.className =
+      "school-no-results";
+
+    noResults.textContent =
+      "Geen scholen gevonden";
+
+    resultsContainer.appendChild(
+      noResults
+    );
+
+    resultsContainer.classList.add(
+      "visible"
+    );
+
+    return;
+
+  }
+
+
+  matches.forEach(school => {
+
+    const result =
+      document.createElement("div");
+
+    result.className =
+      "school-result";
+
+
+    const name =
+      document.createElement("div");
+
+    name.className =
+      "school-result-name";
+
+    name.textContent =
+      school.name;
+
+
+    result.appendChild(name);
+
+
+    /*
+     Adres als tweede regel tonen.
+     */
+
+    if (school.address) {
+
+      const address =
+        document.createElement("div");
+
+      address.className =
+        "school-result-address";
+
+      address.textContent =
+        school.address;
+
+      result.appendChild(address);
+
+    }
+
+
+    result.addEventListener(
+      "click",
+      () => {
+
+        selectSchool(school);
+
+      }
+    );
+
+
+    resultsContainer.appendChild(
+      result
+    );
+
+  });
+
+
+  resultsContainer.classList.add(
+    "visible"
+  );
+
 }
 
 
 /* =========================================================
-   SCHOOLGEGEVENS ONDER DROPDOWN TONEN
+   SCHOOL SELECTEREN
+   ========================================================= */
+
+function selectSchool(school) {
+
+  selectedSchool = school;
+
+
+  const searchInput =
+    document.getElementById(
+      "school-search"
+    );
+
+
+  searchInput.value =
+    school.name;
+
+
+  hideSchoolResults();
+
+  updateSchoolInfo();
+
+  updatePreview();
+
+}
+
+
+/* =========================================================
+   SCHOOLRESULTATEN VERBERGEN
+   ========================================================= */
+
+function hideSchoolResults() {
+
+  const resultsContainer =
+    document.getElementById(
+      "school-results"
+    );
+
+
+  if (resultsContainer) {
+
+    resultsContainer.classList.remove(
+      "visible"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   VERWERKEN WAT GEBRUIKER TYpt
+   ========================================================= */
+
+function handleSchoolSearch() {
+
+  const searchInput =
+    document.getElementById(
+      "school-search"
+    );
+
+
+  const typedValue =
+    searchInput.value.trim();
+
+
+  /*
+   Als iemand na het selecteren weer gaat typen,
+   verbreken we de bestaande selectie.
+   */
+
+  if (
+    selectedSchool &&
+    typedValue !== selectedSchool.name
+  ) {
+
+    selectedSchool = null;
+
+    clearSchoolInfo();
+
+  }
+
+
+  showSchoolResults(
+    typedValue
+  );
+
+
+  updatePreview();
+
+}
+
+
+/* =========================================================
+   SCHOOLINFO LEEGMAKEN
+   ========================================================= */
+
+function clearSchoolInfo() {
+
+  document.getElementById(
+    "school-adres"
+  ).textContent = "—";
+
+
+  document.getElementById(
+    "school-contactpersoon"
+  ).textContent = "—";
+
+
+  document.getElementById(
+    "school-website"
+  ).textContent = "—";
+
+}
+
+
+/* =========================================================
+   SCHOOLINFO TONEN
    ========================================================= */
 
 function updateSchoolInfo() {
@@ -622,13 +744,27 @@ function updatePreview() {
 
 
   /*
-   Schoolgegevens komen rechtstreeks
-   uit het Scholenbord.
+   Als er een school geselecteerd is,
+   gebruiken we de monday-gegevens.
+
+   Als iemand alleen iets heeft getypt,
+   tonen we die tekst als schoolnaam.
    */
+
+  const typedSchoolName =
+    document
+      .getElementById(
+        "school-search"
+      )
+      ?.value
+      ?.trim() || "";
+
 
   const school =
     selectedSchool
-      ?.name || "...";
+      ?.name ||
+      typedSchoolName ||
+      "...";
 
 
   const adres =
@@ -650,10 +786,6 @@ function updatePreview() {
     selectedSchool
       ?.website || "-";
 
-
-  /*
-   Opdrachtgegevens
-   */
 
   const datum =
     getInputValue(
@@ -689,10 +821,6 @@ function updatePreview() {
   }
 
 
-  /*
-   Declarabele uren
-   */
-
   const urenRaw =
     getInputValue(
       "uren"
@@ -705,10 +833,6 @@ function updatePreview() {
       : `${urenRaw} uur`;
 
 
-  /*
-   Tarief
-   */
-
   const tarief =
     formatTarief(
       getInputValue(
@@ -716,10 +840,6 @@ function updatePreview() {
       )
     );
 
-
-  /*
-   Preview vullen
-   */
 
   document.getElementById(
     "p-naam"
@@ -856,7 +976,9 @@ function downloadPDF() {
 
   let naam =
     document
-      .getElementById("naam")
+      .getElementById(
+        "naam"
+      )
       .value
       .trim();
 
@@ -867,7 +989,9 @@ function downloadPDF() {
 
 
   const safeName =
-    createSafeFilename(naam);
+    createSafeFilename(
+      naam
+    );
 
 
   const filename =
@@ -938,35 +1062,117 @@ document.addEventListener(
 
 
     /*
-     Datum rechtsonder PDF.
+     Datum in de PDF zetten.
      */
 
     setCurrentDate();
 
 
     /*
-     Schooldropdown.
+     Zoekveld school.
      */
 
-    const schoolSelect =
+    const schoolSearch =
       document.getElementById(
-        "school"
+        "school-search"
       );
 
 
-    if (schoolSelect) {
+    if (schoolSearch) {
 
-      schoolSelect.addEventListener(
-        "change",
-        handleSchoolChange
+
+      /*
+       Tijdens typen zoeken.
+       */
+
+      schoolSearch.addEventListener(
+        "input",
+        handleSchoolSearch
+      );
+
+
+      /*
+       Bij aanklikken alvast scholen tonen.
+       */
+
+      schoolSearch.addEventListener(
+        "focus",
+        () => {
+
+          showSchoolResults(
+            schoolSearch.value
+          );
+
+        }
+      );
+
+
+      /*
+       Enter selecteert het eerste resultaat.
+       */
+
+      schoolSearch.addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key !== "Enter") {
+            return;
+          }
+
+
+          const firstResult =
+            document.querySelector(
+              ".school-result"
+            );
+
+
+          if (firstResult) {
+
+            event.preventDefault();
+
+            firstResult.click();
+
+          }
+
+        }
       );
 
     }
 
 
     /*
+     Resultaten sluiten wanneer je
+     ergens anders klikt.
+     */
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const wrapper =
+          document.querySelector(
+            ".school-search-wrapper"
+          );
+
+
+        if (
+          wrapper &&
+          !wrapper.contains(
+            event.target
+          )
+        ) {
+
+          hideSchoolResults();
+
+        }
+
+      }
+    );
+
+
+    /*
      Preview automatisch aanpassen
-     tijdens het typen.
+     tijdens het invullen.
      */
 
     document
@@ -974,6 +1180,19 @@ document.addEventListener(
         "input, textarea"
       )
       .forEach(element => {
+
+        /*
+         Schoolzoekveld heeft hierboven
+         al eigen logica.
+         */
+
+        if (
+          element.id ===
+          "school-search"
+        ) {
+          return;
+        }
+
 
         element.addEventListener(
           "input",
@@ -983,15 +1202,13 @@ document.addEventListener(
       });
 
 
-    /*
-     Eerste lege preview tonen.
-     */
+    clearSchoolInfo();
 
     updatePreview();
 
 
     /*
-     Schoolgegevens ophalen uit monday.
+     Scholen uit monday ophalen.
      */
 
     await loadSchools();
