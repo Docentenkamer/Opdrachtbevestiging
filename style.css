@@ -424,6 +424,7 @@ svg.detail-icon,
 .agreements ul {
   margin: 2px 0 0;
   padding-left: 19px;
+  list-style-image: none;
 }
 
 .agreements li {
@@ -432,10 +433,22 @@ svg.detail-icon,
   color: #363636;
   font-size: 11.8px;
   line-height: 1.38;
+  list-style-image: none;
 }
 
 .agreements li::marker {
   color: #f75a36;
+}
+
+
+/* Vangnet: als een browser/extensie ooit een afwijkende
+   list-style-image waarde forceert op een lijst-element in
+   de PDF, zorgt dit dat html2canvas nooit crasht met
+   "Unsupported image type". */
+#pdf-document ul,
+#pdf-document ol,
+#pdf-document li {
+  list-style-image: none;
 }
 
 
