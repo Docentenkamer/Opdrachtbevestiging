@@ -136,6 +136,7 @@ function getWebsite(column) {
       if (parsed.url) {
         return parsed.url;
       }
+
     } catch (error) {
       // Gebruik text als fallback
     }
@@ -159,6 +160,11 @@ async function loadSchools() {
   const datalist =
     document.getElementById("schools-list");
 
+  if (!input || !datalist) {
+    console.error("Schoolvelden niet gevonden.");
+    return;
+  }
+
   input.disabled = true;
   input.placeholder = "Scholen laden...";
 
@@ -169,7 +175,6 @@ async function loadSchools() {
           items {
             id
             name
-
             column_values(
               ids: [
                 "${SCHOOL_COLUMNS.address}",
@@ -206,7 +211,6 @@ async function loadSchools() {
         ?.boards?.[0]
         ?.items_page
         ?.items || [];
-
 
     schools = items.map(item => {
 
@@ -267,11 +271,6 @@ async function loadSchools() {
 
       option.value = school.name;
 
-      /*
-       Sommige browsers tonen dit
-       als extra informatie.
-       */
-
       if (school.address) {
         option.label = school.address;
       }
@@ -313,17 +312,16 @@ async function loadSchools() {
 
 function handleSchoolInput() {
 
+  const schoolInput =
+    document.getElementById("school-search");
+
+  if (!schoolInput) {
+    return;
+  }
+
   const typedName =
-    document
-      .getElementById("school-search")
-      .value
-      .trim();
+    schoolInput.value.trim();
 
-
-  /*
-   Kijken of de getypte naam exact
-   overeenkomt met een monday-school.
-   */
 
   selectedSchool =
     schools.find(
@@ -350,38 +348,66 @@ function handleSchoolInput() {
 
 function clearSchoolInfo() {
 
-  document.getElementById(
-    "school-adres"
-  ).textContent = "—";
+  const address =
+    document.getElementById(
+      "school-adres"
+    );
 
-  document.getElementById(
-    "school-contactpersoon"
-  ).textContent = "—";
+  const contact =
+    document.getElementById(
+      "school-contactpersoon"
+    );
 
-  document.getElementById(
-    "school-website"
-  ).textContent = "—";
+  const website =
+    document.getElementById(
+      "school-website"
+    );
+
+  if (address) {
+    address.textContent = "—";
+  }
+
+  if (contact) {
+    contact.textContent = "—";
+  }
+
+  if (website) {
+    website.textContent = "—";
+  }
 }
 
 
 function updateSchoolInfo() {
 
-  document.getElementById(
-    "school-adres"
-  ).textContent =
-    selectedSchool?.address || "—";
+  const address =
+    document.getElementById(
+      "school-adres"
+    );
 
+  const contact =
+    document.getElementById(
+      "school-contactpersoon"
+    );
 
-  document.getElementById(
-    "school-contactpersoon"
-  ).textContent =
-    selectedSchool?.contact || "—";
+  const website =
+    document.getElementById(
+      "school-website"
+    );
 
+  if (address) {
+    address.textContent =
+      selectedSchool?.address || "—";
+  }
 
-  document.getElementById(
-    "school-website"
-  ).textContent =
-    selectedSchool?.website || "—";
+  if (contact) {
+    contact.textContent =
+      selectedSchool?.contact || "—";
+  }
+
+  if (website) {
+    website.textContent =
+      selectedSchool?.website || "—";
+  }
 }
 
 
@@ -464,53 +490,28 @@ function updatePreview() {
     );
 
 
-  document.getElementById(
-    "p-naam"
-  ).textContent = naam;
+  const setText = (id, value) => {
+    const element =
+      document.getElementById(id);
 
-  document.getElementById(
-    "p-functie"
-  ).textContent = functie;
+    if (element) {
+      element.textContent = value;
+    }
+  };
 
-  document.getElementById(
-    "p-school"
-  ).textContent = school;
 
-  document.getElementById(
-    "p-school-intro"
-  ).textContent = school;
-
-  document.getElementById(
-    "p-plaats"
-  ).textContent = plaats;
-
-  document.getElementById(
-    "p-adres"
-  ).textContent = adres;
-
-  document.getElementById(
-    "p-datum"
-  ).textContent = datum;
-
-  document.getElementById(
-    "p-werktijden"
-  ).textContent = werktijden;
-
-  document.getElementById(
-    "p-uren"
-  ).textContent = uren;
-
-  document.getElementById(
-    "p-tarief"
-  ).textContent = tarief;
-
-  document.getElementById(
-    "p-contactpersoon"
-  ).textContent = contactpersoon;
-
-  document.getElementById(
-    "p-website"
-  ).textContent = website;
+  setText("p-naam", naam);
+  setText("p-functie", functie);
+  setText("p-school", school);
+  setText("p-school-intro", school);
+  setText("p-plaats", plaats);
+  setText("p-adres", adres);
+  setText("p-datum", datum);
+  setText("p-werktijden", werktijden);
+  setText("p-uren", uren);
+  setText("p-tarief", tarief);
+  setText("p-contactpersoon", contactpersoon);
+  setText("p-website", website);
 }
 
 
@@ -533,9 +534,14 @@ function setCurrentDate() {
     );
 
 
-  document.getElementById(
-    "p-vandaag"
-  ).textContent = formatted;
+  const element =
+    document.getElementById(
+      "p-vandaag"
+    );
+
+  if (element) {
+    element.textContent = formatted;
+  }
 }
 
 
@@ -557,72 +563,200 @@ function createSafeFilename(text) {
    PDF DOWNLOADEN
    ========================================================= */
 
-function downloadPDF() {
+async function downloadPDF() {
 
-  updatePreview();
+  try {
+
+    /* Preview eerst volledig bijwerken */
+    updatePreview();
 
 
-  const element =
-    document.getElementById(
-      "pdf-document"
+    /* Controleren of html2pdf beschikbaar is */
+
+    if (typeof html2pdf === "undefined") {
+
+      console.error(
+        "html2pdf is niet geladen."
+      );
+
+      alert(
+        "De PDF-module is nog niet geladen. Vernieuw de pagina en probeer het opnieuw."
+      );
+
+      return;
+    }
+
+
+    /* PDF-element ophalen */
+
+    const element =
+      document.getElementById(
+        "pdf-document"
+      );
+
+
+    if (!element) {
+
+      console.error(
+        'Element met id "pdf-document" niet gevonden.'
+      );
+
+      alert(
+        "De PDF kon niet worden gemaakt omdat het document niet gevonden werd."
+      );
+
+      return;
+    }
+
+
+    /* Naam ophalen */
+
+    let naam =
+      document
+        .getElementById("naam")
+        ?.value
+        ?.trim();
+
+
+    if (!naam) {
+      naam = "opdracht";
+    }
+
+
+    const safeName =
+      createSafeFilename(naam) ||
+      "opdracht";
+
+
+    const filename =
+      `opdrachtbevestiging-${safeName}.pdf`;
+
+
+    /* Even wachten zodat afbeeldingen/fonts
+       volledig zijn verwerkt */
+
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
+
+
+    /* PDF-instellingen */
+
+    const options = {
+
+      margin: 0,
+
+      filename: filename,
+
+      image: {
+        type: "jpeg",
+        quality: 0.98
+      },
+
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        backgroundColor: "#ffffff"
+      },
+
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      },
+
+      pagebreak: {
+        mode: [
+          "avoid-all",
+          "css",
+          "legacy"
+        ]
+      }
+
+    };
+
+
+    console.log(
+      "PDF wordt gegenereerd:",
+      filename
     );
 
 
-  let naam =
-    document
-      .getElementById("naam")
-      .value
-      .trim();
+    /* PDF genereren */
+
+    await html2pdf()
+      .set(options)
+      .from(element)
+      .save();
 
 
-  if (!naam) {
-    naam = "opdracht";
+    console.log(
+      "PDF succesvol gegenereerd."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Fout bij PDF genereren:",
+      error
+    );
+
+    alert(
+      "Er is iets misgegaan bij het maken van de PDF. Bekijk eventueel de browserconsole voor meer informatie."
+    );
+
+  }
+}
+
+
+/* =========================================================
+   DOWNLOADKNOP KOPPELEN
+   ========================================================= */
+
+function setupDownloadButton() {
+
+  /*
+   * We proberen meerdere mogelijke ID's.
+   * Zo is de code wat robuuster als de knop
+   * bijvoorbeeld "download-pdf" of "downloadPDF" heet.
+   */
+
+  const button =
+    document.getElementById("download-pdf") ||
+    document.getElementById("downloadPDF") ||
+    document.getElementById("download-pdf-button");
+
+
+  if (!button) {
+
+    console.warn(
+      "PDF-downloadknop niet gevonden. Controleer het id van de knop in index.html."
+    );
+
+    return;
   }
 
 
-  const filename =
-    `opdrachtbevestiging-${createSafeFilename(naam)}.pdf`;
+  /*
+   * Voorkom dat de knop een formulier submit
+   * en daardoor de pagina opnieuw laadt.
+   */
+
+  button.type = "button";
 
 
-  const options = {
-
-    margin: 0,
-
-    filename: filename,
-
-    image: {
-      type: "jpeg",
-      quality: 0.98
-    },
-
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff"
-    },
-
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait"
-    },
-
-    pagebreak: {
-      mode: [
-        "avoid-all",
-        "css",
-        "legacy"
-      ]
-    }
-
-  };
+  button.addEventListener(
+    "click",
+    downloadPDF
+  );
 
 
-  html2pdf()
-    .set(options)
-    .from(element)
-    .save();
+  console.log(
+    "PDF-downloadknop gekoppeld."
+  );
 }
 
 
@@ -647,16 +781,20 @@ document.addEventListener(
       );
 
 
-    schoolInput.addEventListener(
-      "input",
-      handleSchoolInput
-    );
+    if (schoolInput) {
+
+      schoolInput.addEventListener(
+        "input",
+        handleSchoolInput
+      );
 
 
-    schoolInput.addEventListener(
-      "change",
-      handleSchoolInput
-    );
+      schoolInput.addEventListener(
+        "change",
+        handleSchoolInput
+      );
+
+    }
 
 
     document
@@ -672,6 +810,7 @@ document.addEventListener(
           return;
         }
 
+
         element.addEventListener(
           "input",
           updatePreview
@@ -680,6 +819,15 @@ document.addEventListener(
       });
 
 
+    /*
+     * PDF-knop koppelen
+     */
+    setupDownloadButton();
+
+
+    /*
+     * Scholen uit monday laden
+     */
     await loadSchools();
 
   }
