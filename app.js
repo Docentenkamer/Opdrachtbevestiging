@@ -835,3 +835,7 @@ document.addEventListener(
     /*
      * Scholen uit monday laden
      */
+    await loadSchools();
+
+  }
+);
