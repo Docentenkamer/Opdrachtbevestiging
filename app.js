@@ -8,7 +8,7 @@ const SCHOOLS_BOARD_ID = 5092598441;
 
 const SCHOOL_COLUMNS = {
   address: "location_mm1gvbxd",
-  contact: "text_mm1g37d1",
+  contact: "board_relation_mm78dcsg",
   website: "company_domain"
 };
 
