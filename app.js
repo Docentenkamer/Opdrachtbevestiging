@@ -754,9 +754,35 @@ async function downloadPDF() {
 
     /* PDF genereren */
 
+    /*
+     * De inhoud is altijd bedoeld als één
+     * pagina. Door afrondingsverschillen kan
+     * html2pdf soms een piepklein "restje"
+     * op een tweede, vrijwel lege pagina
+     * zetten (die dan uitgerekt en vervormd
+     * oogt). Die overtollige pagina('s)
+     * verwijderen we hier automatisch.
+     */
+
     await html2pdf()
       .set(options)
       .from(element)
+      .toPdf()
+      .get("pdf")
+      .then(function (pdf) {
+
+        const totalPages =
+          pdf.internal.getNumberOfPages();
+
+        for (
+          let page = totalPages;
+          page > 1;
+          page--
+        ) {
+          pdf.deletePage(page);
+        }
+
+      })
       .save();
 
 
