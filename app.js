@@ -616,7 +616,16 @@ async function downloadPDF() {
     }
 
 
-    /* Naam ophalen */
+    /* Bestandsnaam samenstellen:
+       naam_school_functie_eerstedatum.pdf
+       Zo is elke opdrachtbevestiging in de
+       downloads-map makkelijk te herkennen en
+       terug te zoeken, en blijft de naam ook
+       kort als er meerdere data zijn ingevuld
+       (we gebruiken dan alleen de eerste datum,
+       zodat dezelfde leerkracht op dezelfde
+       groep maar een andere dag toch een eigen
+       bestandsnaam krijgt). */
 
     let naam =
       document
@@ -624,19 +633,71 @@ async function downloadPDF() {
         ?.value
         ?.trim();
 
-
     if (!naam) {
-      naam = "opdracht";
+      naam = "kandidaat";
     }
 
 
-    const safeName =
+    let school =
+      selectedSchool?.name ||
+      document
+        .getElementById("school-search")
+        ?.value
+        ?.trim();
+
+    if (!school) {
+      school = "school";
+    }
+
+
+    let functie =
+      document
+        .getElementById("functie")
+        ?.value
+        ?.trim();
+
+    if (!functie) {
+      functie = "opdracht";
+    }
+
+
+    let datum =
+      document
+        .getElementById("datum")
+        ?.value
+        ?.trim();
+
+    /* Bij meerdere, komma-gescheiden data
+       (bijv. "15/09, 16/09, 17/09") nemen we
+       alleen de eerste. */
+    if (datum) {
+      datum = datum.split(",")[0].trim();
+    }
+
+    if (!datum) {
+      datum = "datum";
+    }
+
+
+    const safeNaam =
       createSafeFilename(naam) ||
+      "kandidaat";
+
+    const safeSchool =
+      createSafeFilename(school) ||
+      "school";
+
+    const safeFunctie =
+      createSafeFilename(functie) ||
       "opdracht";
+
+    const safeDatum =
+      createSafeFilename(datum) ||
+      "datum";
 
 
     const filename =
-      `opdrachtbevestiging-${safeName}.pdf`;
+      `${safeNaam}_${safeSchool}_${safeFunctie}_${safeDatum}.pdf`;
 
 
     /* Even wachten zodat afbeeldingen/fonts
