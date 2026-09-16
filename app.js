@@ -95,6 +95,10 @@ function getColumnText(column) {
     return column.text.trim();
   }
 
+  if (column.display_value && column.display_value.trim()) {
+    return column.display_value.trim();
+  }
+
   if (column.value) {
     try {
       const parsed = JSON.parse(column.value);
@@ -185,6 +189,9 @@ async function loadSchools() {
               id
               text
               value
+              ... on BoardRelationValue {
+                display_value
+              }
             }
           }
         }
@@ -828,7 +835,3 @@ document.addEventListener(
     /*
      * Scholen uit monday laden
      */
-    await loadSchools();
-
-  }
-);
