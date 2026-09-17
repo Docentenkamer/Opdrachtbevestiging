@@ -578,6 +578,21 @@ async function downloadPDF() {
     updatePreview();
 
 
+    /* ---------------------------------------------------
+       FIX: scrollpositie resetten vóór het renderen.
+       html2canvas rendert het element t.o.v. de viewport,
+       niet t.o.v. het document. Als de pagina op dat
+       moment gescrold is (bijv. omdat het linker formulier
+       langer is dan het scherm), blijft er bovenaan de PDF
+       precies zoveel witruimte staan als er gescrold was
+       en schuift de rest van de inhoud mee naar beneden.
+       Door naar boven te scrollen vóór het genereren,
+       voorkomen we dat helemaal.
+       --------------------------------------------------- */
+    window.scrollTo(0, 0);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+
     /* Controleren of html2pdf beschikbaar is */
 
     if (typeof html2pdf === "undefined") {
@@ -726,7 +741,13 @@ async function downloadPDF() {
         useCORS: true,
         allowTaint: false,
         logging: false,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+
+        /* FIX: compenseert een eventuele resterende
+           scrollpositie, als extra vangnet bovenop de
+           window.scrollTo(0, 0) hierboven. */
+        scrollX: 0,
+        scrollY: -window.scrollY
       },
 
       jsPDF: {
