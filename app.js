@@ -15,6 +15,10 @@ const SCHOOL_COLUMNS = {
 let schools = [];
 let selectedSchool = null;
 
+/* Index van het actieve item in de school-dropdown
+   (voor pijltjestoetsen-navigatie). -1 = niets actief. */
+let activeDropdownIndex = -1;
+
 
 /* =========================================================
    HULPFUNCTIES
@@ -161,11 +165,8 @@ async function loadSchools() {
   const input =
     document.getElementById("school-search");
 
-  const datalist =
-    document.getElementById("schools-list");
-
-  if (!input || !datalist) {
-    console.error("Schoolvelden niet gevonden.");
+  if (!input) {
+    console.error("Schoolveld niet gevonden.");
     return;
   }
 
@@ -267,26 +268,6 @@ async function loadSchools() {
       );
 
 
-    /* Dropdown vullen */
-
-    datalist.innerHTML = "";
-
-    schools.forEach(school => {
-
-      const option =
-        document.createElement("option");
-
-      option.value = school.name;
-
-      if (school.address) {
-        option.label = school.address;
-      }
-
-      datalist.appendChild(option);
-
-    });
-
-
     input.disabled = false;
 
     input.placeholder =
@@ -314,13 +295,211 @@ async function loadSchools() {
 
 
 /* =========================================================
-   SCHOOL SELECTEREN
+   SCHOOL-DROPDOWN (eigen, scrollbare lijst i.p.v.
+   de native <datalist>, die in de meeste browsers niet
+   met het muiswiel te scrollen is)
+   ========================================================= */
+
+function getSchoolInputEl() {
+  return document.getElementById("school-search");
+}
+
+function getSchoolDropdownEl() {
+  return document.getElementById("schools-dropdown");
+}
+
+
+function filterSchools(query) {
+
+  const normalized = query.trim().toLowerCase();
+
+  if (!normalized) {
+    return schools;
+  }
+
+  return schools.filter(school =>
+    school.name.toLowerCase().includes(normalized)
+  );
+}
+
+
+function renderSchoolsDropdown(list) {
+
+  const dropdown = getSchoolDropdownEl();
+
+  if (!dropdown) {
+    return;
+  }
+
+  dropdown.innerHTML = "";
+  activeDropdownIndex = -1;
+
+  if (!list.length) {
+
+    const empty = document.createElement("li");
+    empty.className = "no-results";
+    empty.textContent = "Geen scholen gevonden";
+    dropdown.appendChild(empty);
+
+    return;
+  }
+
+  list.forEach(school => {
+
+    const item = document.createElement("li");
+    item.setAttribute("role", "option");
+    item.dataset.schoolId = school.id;
+
+    const name = document.createElement("span");
+    name.textContent = school.name;
+    item.appendChild(name);
+
+    if (school.address) {
+
+      const address = document.createElement("span");
+      address.className = "school-address";
+      address.textContent = school.address;
+      item.appendChild(address);
+
+    }
+
+    /*
+     * mousedown i.p.v. click: dit vuurt vóór het
+     * blur-event van het inputveld, zodat de selectie
+     * verwerkt wordt vóórdat de dropdown (via blur)
+     * zou sluiten.
+     */
+    item.addEventListener("mousedown", event => {
+      event.preventDefault();
+      selectSchoolFromDropdown(school);
+    });
+
+    dropdown.appendChild(item);
+
+  });
+}
+
+
+function openSchoolsDropdown(query = "") {
+
+  const dropdown = getSchoolDropdownEl();
+  const input = getSchoolInputEl();
+
+  if (!dropdown) {
+    return;
+  }
+
+  const list = filterSchools(query);
+
+  renderSchoolsDropdown(list);
+
+  dropdown.classList.add("open");
+
+  if (input) {
+    input.setAttribute("aria-expanded", "true");
+  }
+}
+
+
+function closeSchoolsDropdown() {
+
+  const dropdown = getSchoolDropdownEl();
+  const input = getSchoolInputEl();
+
+  if (!dropdown) {
+    return;
+  }
+
+  dropdown.classList.remove("open");
+  activeDropdownIndex = -1;
+
+  if (input) {
+    input.setAttribute("aria-expanded", "false");
+  }
+}
+
+
+function selectSchoolFromDropdown(school) {
+
+  const input = getSchoolInputEl();
+
+  if (input) {
+    input.value = school.name;
+  }
+
+  selectedSchool = school;
+
+  updateSchoolInfo();
+  closeSchoolsDropdown();
+  updatePreview();
+}
+
+
+function getDropdownOptionEls() {
+
+  const dropdown = getSchoolDropdownEl();
+
+  if (!dropdown) {
+    return [];
+  }
+
+  return Array.from(
+    dropdown.querySelectorAll("li[role='option']")
+  );
+}
+
+
+function moveDropdownSelection(step) {
+
+  const items = getDropdownOptionEls();
+
+  if (!items.length) {
+    return;
+  }
+
+  activeDropdownIndex =
+    (activeDropdownIndex + step + items.length) % items.length;
+
+  items.forEach((item, index) => {
+    item.classList.toggle(
+      "active",
+      index === activeDropdownIndex
+    );
+  });
+
+  items[activeDropdownIndex].scrollIntoView({
+    block: "nearest"
+  });
+}
+
+
+function confirmDropdownSelection() {
+
+  const items = getDropdownOptionEls();
+
+  if (activeDropdownIndex < 0 || !items[activeDropdownIndex]) {
+    return;
+  }
+
+  const schoolId =
+    items[activeDropdownIndex].dataset.schoolId;
+
+  const school =
+    schools.find(candidate => candidate.id === schoolId);
+
+  if (school) {
+    selectSchoolFromDropdown(school);
+  }
+}
+
+
+/* =========================================================
+   SCHOOL SELECTEREN (typen)
    ========================================================= */
 
 function handleSchoolInput() {
 
-  const schoolInput =
-    document.getElementById("school-search");
+  const schoolInput = getSchoolInputEl();
 
   if (!schoolInput) {
     return;
@@ -346,6 +525,8 @@ function handleSchoolInput() {
 
 
   updatePreview();
+
+  openSchoolsDropdown(typedName);
 }
 
 
@@ -890,10 +1071,7 @@ document.addEventListener(
     updatePreview();
 
 
-    const schoolInput =
-      document.getElementById(
-        "school-search"
-      );
+    const schoolInput = getSchoolInputEl();
 
 
     if (schoolInput) {
@@ -909,7 +1087,79 @@ document.addEventListener(
         handleSchoolInput
       );
 
+
+      /* Bij focus: toon meteen de volledige,
+         scrollbare lijst met alle scholen. */
+      schoolInput.addEventListener("focus", () => {
+        openSchoolsDropdown("");
+      });
+
+
+      /* Kleine vertraging vóór het sluiten, zodat een
+         klik op een dropdown-item (mousedown hierboven)
+         eerst verwerkt wordt. */
+      schoolInput.addEventListener("blur", () => {
+        setTimeout(closeSchoolsDropdown, 100);
+      });
+
+
+      schoolInput.addEventListener("keydown", event => {
+
+        const dropdownOpen =
+          getSchoolDropdownEl()?.classList.contains("open");
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+
+          if (!dropdownOpen) {
+            openSchoolsDropdown(schoolInput.value.trim());
+          } else {
+            moveDropdownSelection(1);
+          }
+
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+
+          if (dropdownOpen) {
+            moveDropdownSelection(-1);
+          }
+
+        } else if (event.key === "Enter") {
+
+          if (dropdownOpen && activeDropdownIndex >= 0) {
+            event.preventDefault();
+            confirmDropdownSelection();
+          }
+
+        } else if (event.key === "Escape") {
+          closeSchoolsDropdown();
+        }
+
+      });
+
     }
+
+
+    /* Klik buiten de dropdown sluit 'm ook
+       (naast de blur-afhandeling hierboven). */
+    document.addEventListener("click", event => {
+
+      const dropdown = getSchoolDropdownEl();
+      const input = getSchoolInputEl();
+
+      if (!dropdown || !input) {
+        return;
+      }
+
+      const clickedInside =
+        dropdown.contains(event.target) ||
+        input.contains(event.target);
+
+      if (!clickedInside) {
+        closeSchoolsDropdown();
+      }
+
+    });
 
 
     document
