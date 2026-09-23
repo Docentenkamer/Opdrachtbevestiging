@@ -748,6 +748,140 @@ function createSafeFilename(text) {
 
 
 /* =========================================================
+   MOBIEL DETECTEREN + PDF AFLEVEREN
+   ========================================================= */
+
+/*
+ * De mobiele Monday-app toont deze pagina in een ingebouwde
+ * webweergave (WebView). Zo'n WebView negeert meestal de
+ * "onzichtbare link + automatische klik"-truc waarmee een
+ * download normaal start (dat is precies wat html2pdf.js'
+ * eigen .save() doet), zonder dat er een foutmelding komt.
+ * Op mobiel gebruiken we daarom de native deel-/opslaanfunctie
+ * van het toestel (Web Share API) i.p.v. een automatische
+ * download.
+ */
+
+function isMobileDevice() {
+
+  const ua =
+    navigator.userAgent ||
+    navigator.vendor ||
+    window.opera ||
+    "";
+
+  const isTouchTablet =
+    navigator.maxTouchPoints &&
+    navigator.maxTouchPoints > 1 &&
+    /Macintosh/i.test(ua);
+  /* iPadOS meldt zich vanaf versie 13 als "Macintosh";
+     dit vangt dat geval alsnog op als mobiel/tablet. */
+
+  return (
+    /android|iphone|ipad|ipod/i.test(ua) ||
+    Boolean(isTouchTablet)
+  );
+}
+
+
+async function deliverPdfOnMobile(blob, filename) {
+
+  let file = null;
+
+  try {
+    file = new File(
+      [blob],
+      filename,
+      { type: "application/pdf" }
+    );
+  } catch (error) {
+    file = null;
+  }
+
+
+  /* Stap 1: probeer het native deel-/opslaanvenster
+     van het toestel. Dit werkt, in tegenstelling tot een
+     gewone download-link, ook binnen een WebView zoals de
+     Monday-app. */
+
+  if (
+    file &&
+    navigator.canShare &&
+    navigator.canShare({ files: [file] })
+  ) {
+
+    try {
+
+      await navigator.share({
+        files: [file],
+        title: filename
+      });
+
+      console.log(
+        "PDF gedeeld/opgeslagen via het native deelvenster."
+      );
+
+      return;
+
+    } catch (shareError) {
+
+      /* Gebruiker annuleerde het deelvenster, of delen
+         is om een andere reden mislukt. We vallen dan
+         terug op stap 2 hieronder. */
+
+      console.warn(
+        "Delen geannuleerd of mislukt, val terug op openen in nieuw tabblad:",
+        shareError
+      );
+
+    }
+  }
+
+
+  /* Stap 2 (vangnet): open de PDF in een nieuw tabblad.
+     De browser toont dan zijn eigen PDF-weergave, van
+     waaruit de gebruiker 'm alsnog kan opslaan of delen
+     via het venstermenu. */
+
+  const url = URL.createObjectURL(blob);
+
+  const opened = window.open(url, "_blank");
+
+  if (!opened) {
+
+    /* Pop-up geblokkeerd: laatste redmiddel, navigeer
+       het huidige tabblad zelf naar de PDF. */
+
+    window.location.href = url;
+  }
+
+  setTimeout(
+    () => URL.revokeObjectURL(url),
+    60000
+  );
+}
+
+
+function deliverPdfOnDesktop(blob, filename) {
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(
+    () => URL.revokeObjectURL(url),
+    60000
+  );
+}
+
+
+/* =========================================================
    PDF DOWNLOADEN
    ========================================================= */
 
@@ -966,10 +1100,13 @@ async function downloadPDF() {
      * verwijderen we hier automatisch.
      */
 
-    await html2pdf()
-      .set(options)
-      .from(element)
-      .toPdf()
+    const worker =
+      html2pdf()
+        .set(options)
+        .from(element)
+        .toPdf();
+
+    await worker
       .get("pdf")
       .then(function (pdf) {
 
@@ -984,8 +1121,33 @@ async function downloadPDF() {
           pdf.deletePage(page);
         }
 
-      })
-      .save();
+      });
+
+
+    /* De klaar-gemaakte PDF als blob ophalen, zodat we
+       zelf kunnen bepalen hoe hij wordt afgeleverd:
+       automatisch downloaden op desktop, of via de
+       native deel-/opslaanfunctie op mobiel. */
+
+    const pdfBlob =
+      await worker.outputPdf("blob");
+
+
+    if (isMobileDevice()) {
+
+      await deliverPdfOnMobile(
+        pdfBlob,
+        filename
+      );
+
+    } else {
+
+      deliverPdfOnDesktop(
+        pdfBlob,
+        filename
+      );
+
+    }
 
 
     console.log(
