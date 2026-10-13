@@ -173,28 +173,53 @@ async function loadSchools() {
   input.disabled = true;
   input.placeholder = "Scholen laden...";
 
-  const query = `
+  /*
+   * Het Scholen-bord bevat inmiddels meer dan 500 items
+   * (en groeit nog). Monday geeft per aanvraag maximaal
+   * 500 items terug, dus we halen alles pagina voor pagina
+   * op met een cursor, tot er geen volgende pagina meer is.
+   * Eerder werd alleen de eerste pagina van 500 opgehaald,
+   * waardoor veel scholen niet in de lijst verschenen.
+   */
+
+  const columnSelection = `
+    id
+    name
+    column_values(
+      ids: [
+        "${SCHOOL_COLUMNS.address}",
+        "${SCHOOL_COLUMNS.contact}",
+        "${SCHOOL_COLUMNS.website}"
+      ]
+    ) {
+      id
+      text
+      value
+      ... on BoardRelationValue {
+        display_value
+      }
+    }
+  `;
+
+  const firstPageQuery = `
     query {
       boards(ids: [${SCHOOLS_BOARD_ID}]) {
         items_page(limit: 500) {
+          cursor
           items {
-            id
-            name
-            column_values(
-              ids: [
-                "${SCHOOL_COLUMNS.address}",
-                "${SCHOOL_COLUMNS.contact}",
-                "${SCHOOL_COLUMNS.website}"
-              ]
-            ) {
-              id
-              text
-              value
-              ... on BoardRelationValue {
-                display_value
-              }
-            }
+            ${columnSelection}
           }
+        }
+      }
+    }
+  `;
+
+  const nextPageQuery = `
+    query ($cursor: String!) {
+      next_items_page(limit: 500, cursor: $cursor) {
+        cursor
+        items {
+          ${columnSelection}
         }
       }
     }
@@ -202,23 +227,64 @@ async function loadSchools() {
 
   try {
 
-    const response =
-      await monday.api(query);
+    const items = [];
+
+    const firstResponse =
+      await monday.api(firstPageQuery);
 
     if (
-      response.errors &&
-      response.errors.length > 0
+      firstResponse.errors &&
+      firstResponse.errors.length > 0
     ) {
       throw new Error(
-        response.errors[0].message
+        firstResponse.errors[0].message
       );
     }
 
-    const items =
-      response?.data
+    const firstPage =
+      firstResponse?.data
         ?.boards?.[0]
-        ?.items_page
-        ?.items || [];
+        ?.items_page;
+
+    items.push(...(firstPage?.items || []));
+
+    let cursor =
+      firstPage?.cursor || null;
+
+    /* Veiligheidsgrens van 50 pagina's (25.000 scholen)
+       om een oneindige lus te voorkomen. */
+    let pageCount = 1;
+
+    while (cursor && pageCount < 50) {
+
+      input.placeholder =
+        `Scholen laden... (${items.length})`;
+
+      const nextResponse =
+        await monday.api(
+          nextPageQuery,
+          { variables: { cursor: cursor } }
+        );
+
+      if (
+        nextResponse.errors &&
+        nextResponse.errors.length > 0
+      ) {
+        throw new Error(
+          nextResponse.errors[0].message
+        );
+      }
+
+      const nextPage =
+        nextResponse?.data?.next_items_page;
+
+      items.push(...(nextPage?.items || []));
+
+      cursor =
+        nextPage?.cursor || null;
+
+      pageCount++;
+    }
 
     schools = items.map(item => {
 
