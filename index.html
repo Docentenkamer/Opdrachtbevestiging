@@ -11,7 +11,7 @@
 
   <title>Opdrachtbevestiging | Invalkamer</title>
 
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 
   <script src="https://cdn.jsdelivr.net/npm/monday-sdk-js@0.5.9/dist/main.js"></script>
 
@@ -79,6 +79,18 @@
         >
           <label for="location-select">Locatie</label>
           <select id="location-select"></select>
+        </div>
+
+        <div
+          id="contact-field"
+          class="field full"
+          hidden
+        >
+          <label>Contactpersonen op de bevestiging</label>
+          <div
+            id="contact-options"
+            class="contact-options"
+          ></div>
         </div>
 
         <div
@@ -399,7 +411,7 @@
 
   </div>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 
 </body>
 
