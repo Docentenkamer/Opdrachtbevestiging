@@ -20,6 +20,9 @@ let selectedSchool = null;
    "main" = hoofdlocatie, "dependance" = dependance. */
 let selectedLocation = "main";
 
+/* Id's van de contactpersonen die op de bevestiging komen. */
+let selectedContactIds = new Set();
+
 /* Index van het actieve item in de school-dropdown
    (voor pijltjestoetsen-navigatie). -1 = niets actief. */
 let activeDropdownIndex = -1;
@@ -203,6 +206,10 @@ async function loadSchools() {
       value
       ... on BoardRelationValue {
         display_value
+        linked_items {
+          id
+          name
+        }
       }
     }
   `;
@@ -314,6 +321,38 @@ async function loadSchools() {
           columns[SCHOOL_COLUMNS.contact]
         );
 
+      /* Lijst van gekoppelde contactpersonen (id + naam),
+         zodat er per opdracht gekozen kan worden wie op de
+         bevestiging komt. Valt terug op de kommagescheiden
+         tekst als linked_items ontbreekt. */
+      const contactColumn =
+        columns[SCHOOL_COLUMNS.contact];
+
+      let contacts = [];
+
+      if (
+        contactColumn &&
+        Array.isArray(contactColumn.linked_items)
+      ) {
+        contacts = contactColumn.linked_items
+          .filter(linked => linked && linked.name)
+          .map(linked => ({
+            id: String(linked.id),
+            name: linked.name.trim()
+          }));
+      }
+
+      if (!contacts.length && contact) {
+        contacts = contact
+          .split(",")
+          .map(name => name.trim())
+          .filter(Boolean)
+          .map((name, index) => ({
+            id: `tekst-${index}`,
+            name: name
+          }));
+      }
+
       const website =
         getWebsite(
           columns[SCHOOL_COLUMNS.website]
@@ -327,6 +366,7 @@ async function loadSchools() {
         dependanceAddress: dependanceAddress,
         dependancePlace: extractPlace(dependanceAddress),
         contact: contact,
+        contacts: contacts,
         website: website
       };
 
@@ -457,6 +497,93 @@ function handleLocationChange() {
 
   updateSchoolInfo();
   updatePreview();
+}
+
+
+/* =========================================================
+   CONTACTPERSONEN (kiezen wie er op de bevestiging komt)
+   ========================================================= */
+
+/* Tekst met de gekozen contactpersonen, kommagescheiden. */
+function getActiveContactsText() {
+
+  if (!selectedSchool) {
+    return "";
+  }
+
+  const contacts = selectedSchool.contacts || [];
+
+  if (!contacts.length) {
+    return selectedSchool.contact || "";
+  }
+
+  return contacts
+    .filter(contact => selectedContactIds.has(contact.id))
+    .map(contact => contact.name)
+    .join(", ");
+}
+
+
+/* Bouwt de lijst met vinkjes op. Bij 0 of 1 contactpersoon
+   is er niets te kiezen en blijft het veld verborgen. Standaard
+   staan alle contactpersonen aangevinkt (zoals voorheen). */
+function setupContactField() {
+
+  const field =
+    document.getElementById("contact-field");
+
+  const options =
+    document.getElementById("contact-options");
+
+  if (!field || !options) {
+    return;
+  }
+
+  options.innerHTML = "";
+
+  const contacts = selectedSchool?.contacts || [];
+
+  selectedContactIds = new Set(
+    contacts.map(contact => contact.id)
+  );
+
+  if (contacts.length < 2) {
+    field.hidden = true;
+    return;
+  }
+
+  contacts.forEach(contact => {
+
+    const label = document.createElement("label");
+    label.className = "contact-option";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = true;
+    checkbox.value = contact.id;
+
+    checkbox.addEventListener("change", () => {
+
+      if (checkbox.checked) {
+        selectedContactIds.add(contact.id);
+      } else {
+        selectedContactIds.delete(contact.id);
+      }
+
+      updateSchoolInfo();
+      updatePreview();
+    });
+
+    const text = document.createElement("span");
+    text.textContent = contact.name;
+
+    label.appendChild(checkbox);
+    label.appendChild(text);
+    options.appendChild(label);
+
+  });
+
+  field.hidden = false;
 }
 
 
@@ -596,6 +723,7 @@ function selectSchoolFromDropdown(school) {
   selectedSchool = school;
 
   setupLocationField();
+  setupContactField();
   updateSchoolInfo();
   closeSchoolsDropdown();
   updatePreview();
@@ -691,6 +819,7 @@ function handleSchoolInput() {
      keuze bij elke toetsaanslag terugspringen). */
   if (selectedSchool !== previousSchool) {
     setupLocationField();
+    setupContactField();
   }
 
 
@@ -766,7 +895,7 @@ function updateSchoolInfo() {
 
   if (contact) {
     contact.textContent =
-      selectedSchool?.contact || "—";
+      getActiveContactsText() || "—";
   }
 
   if (website) {
@@ -811,7 +940,7 @@ function updatePreview() {
     activeLocation.place || "...";
 
   const contactpersoon =
-    selectedSchool?.contact || "-";
+    getActiveContactsText() || "-";
 
   const website =
     selectedSchool?.website || "-";
