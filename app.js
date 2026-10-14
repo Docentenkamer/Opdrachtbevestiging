@@ -8,12 +8,17 @@ const SCHOOLS_BOARD_ID = 5092598441;
 
 const SCHOOL_COLUMNS = {
   address: "location_mm1gvbxd",
+  dependance: "location_mm2vzkq7",
   contact: "board_relation_mm78dcsg",
   website: "company_domain"
 };
 
 let schools = [];
 let selectedSchool = null;
+
+/* Gekozen locatie van de geselecteerde school:
+   "main" = hoofdlocatie, "dependance" = dependance. */
+let selectedLocation = "main";
 
 /* Index van het actieve item in de school-dropdown
    (voor pijltjestoetsen-navigatie). -1 = niets actief. */
@@ -188,6 +193,7 @@ async function loadSchools() {
     column_values(
       ids: [
         "${SCHOOL_COLUMNS.address}",
+        "${SCHOOL_COLUMNS.dependance}",
         "${SCHOOL_COLUMNS.contact}",
         "${SCHOOL_COLUMNS.website}"
       ]
@@ -298,6 +304,11 @@ async function loadSchools() {
           columns[SCHOOL_COLUMNS.address]
         );
 
+      const dependanceAddress =
+        getColumnText(
+          columns[SCHOOL_COLUMNS.dependance]
+        );
+
       const contact =
         getColumnText(
           columns[SCHOOL_COLUMNS.contact]
@@ -313,6 +324,8 @@ async function loadSchools() {
         name: item.name || "",
         address: address,
         place: extractPlace(address),
+        dependanceAddress: dependanceAddress,
+        dependancePlace: extractPlace(dependanceAddress),
         contact: contact,
         website: website
       };
@@ -357,6 +370,93 @@ async function loadSchools() {
       "Scholen konden niet worden geladen";
 
   }
+}
+
+
+/* =========================================================
+   LOCATIE (hoofdlocatie of dependance)
+   ========================================================= */
+
+/* Geeft adres + plaats van de gekozen locatie terug.
+   Heeft de school geen dependance, dan altijd de hoofdlocatie. */
+function getActiveLocation() {
+
+  if (!selectedSchool) {
+    return { address: "", place: "", isDependance: false };
+  }
+
+  if (
+    selectedLocation === "dependance" &&
+    selectedSchool.dependanceAddress
+  ) {
+    return {
+      address: selectedSchool.dependanceAddress,
+      place: selectedSchool.dependancePlace,
+      isDependance: true
+    };
+  }
+
+  return {
+    address: selectedSchool.address,
+    place: selectedSchool.place,
+    isDependance: false
+  };
+}
+
+
+/* Toont of verbergt de locatiekeuze en vult de opties.
+   Wordt aangeroepen zodra de geselecteerde school verandert. */
+function setupLocationField() {
+
+  const field =
+    document.getElementById("location-field");
+
+  const select =
+    document.getElementById("location-select");
+
+  if (!field || !select) {
+    return;
+  }
+
+  selectedLocation = "main";
+
+  if (!selectedSchool || !selectedSchool.dependanceAddress) {
+    field.hidden = true;
+    select.innerHTML = "";
+    return;
+  }
+
+  select.innerHTML = "";
+
+  const mainOption = document.createElement("option");
+  mainOption.value = "main";
+  mainOption.textContent =
+    `Hoofdlocatie – ${selectedSchool.address || "geen adres"}`;
+  select.appendChild(mainOption);
+
+  const depOption = document.createElement("option");
+  depOption.value = "dependance";
+  depOption.textContent =
+    `Dependance – ${selectedSchool.dependanceAddress}`;
+  select.appendChild(depOption);
+
+  select.value = "main";
+  field.hidden = false;
+}
+
+
+function handleLocationChange() {
+
+  const select =
+    document.getElementById("location-select");
+
+  selectedLocation =
+    select && select.value === "dependance"
+      ? "dependance"
+      : "main";
+
+  updateSchoolInfo();
+  updatePreview();
 }
 
 
@@ -495,6 +595,7 @@ function selectSchoolFromDropdown(school) {
 
   selectedSchool = school;
 
+  setupLocationField();
   updateSchoolInfo();
   closeSchoolsDropdown();
   updatePreview();
@@ -575,12 +676,22 @@ function handleSchoolInput() {
     schoolInput.value.trim();
 
 
+  const previousSchool = selectedSchool;
+
   selectedSchool =
     schools.find(
       school =>
         school.name.toLowerCase() ===
         typedName.toLowerCase()
     ) || null;
+
+
+  /* Locatiekeuze alleen opnieuw opbouwen als er een
+     andere school is gekozen (anders zou een gemaakte
+     keuze bij elke toetsaanslag terugspringen). */
+  if (selectedSchool !== previousSchool) {
+    setupLocationField();
+  }
 
 
   if (selectedSchool) {
@@ -650,7 +761,7 @@ function updateSchoolInfo() {
 
   if (address) {
     address.textContent =
-      selectedSchool?.address || "—";
+      getActiveLocation().address || "—";
   }
 
   if (contact) {
@@ -691,11 +802,13 @@ function updatePreview() {
     "...";
 
 
+  const activeLocation = getActiveLocation();
+
   const adres =
-    selectedSchool?.address || "-";
+    activeLocation.address || "-";
 
   const plaats =
-    selectedSchool?.place || "...";
+    activeLocation.place || "...";
 
   const contactpersoon =
     selectedSchool?.contact || "-";
@@ -1365,6 +1478,17 @@ document.addEventListener(
 
       });
 
+    }
+
+
+    const locationSelect =
+      document.getElementById("location-select");
+
+    if (locationSelect) {
+      locationSelect.addEventListener(
+        "change",
+        handleLocationChange
+      );
     }
 
 
