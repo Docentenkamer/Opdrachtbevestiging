@@ -546,6 +546,14 @@ svg.detail-icon,
 }
 
 
+/* Link naar de algemene inkoopvoorwaarden in de afspraken */
+.agreements a.pdf-link {
+  color: #f75a36;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+
 /* Vangnet: als een browser/extensie ooit een afwijkende
    list-style-image waarde forceert op een lijst-element in
    de PDF, zorgt dit dat html2canvas nooit crasht met
