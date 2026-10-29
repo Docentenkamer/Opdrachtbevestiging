@@ -6,6 +6,12 @@ const monday = window.mondaySdk();
 
 const SCHOOLS_BOARD_ID = 5092598441;
 
+/* Bestand met de algemene inkoopvoorwaarden. Dit bestand staat
+   in dezelfde GitHub-map als index.html. Vervang je later de
+   voorwaarden, upload dan de nieuwe versie onder deze bestandsnaam,
+   dan blijft de link in elke nieuwe bevestiging werken. */
+const VOORWAARDEN_FILE = "algemene-inkoopvoorwaarden.pdf";
+
 const SCHOOL_COLUMNS = {
   address: "location_mm1gvbxd",
   dependance: "location_mm2vzkq7",
@@ -1012,6 +1018,35 @@ function updatePreview() {
 
 
 /* =========================================================
+   LINK NAAR ALGEMENE INKOOPVOORWAARDEN
+   ========================================================= */
+
+/* Maakt van de link een volledige (absolute) URL. Een
+   relatieve link zou in de gedownloade PDF niet meer weten
+   waar het bestand staat; met de volledige URL werkt de
+   link ook als de PDF wordt gemaild of geopend. */
+function setupVoorwaardenLink() {
+
+  const link =
+    document.getElementById("p-voorwaarden-link");
+
+  if (!link) {
+    return;
+  }
+
+  try {
+    link.href =
+      new URL(VOORWAARDEN_FILE, document.baseURI).href;
+  } catch (error) {
+    console.warn(
+      "Link naar de voorwaarden kon niet worden opgebouwd:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
    DATUM VAN VANDAAG
    ========================================================= */
 
@@ -1535,6 +1570,8 @@ document.addEventListener(
   async function () {
 
     setCurrentDate();
+
+    setupVoorwaardenLink();
 
     clearSchoolInfo();
 
