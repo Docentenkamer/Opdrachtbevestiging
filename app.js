@@ -29,6 +29,19 @@ let selectedLocation = "main";
 /* Id's van de contactpersonen die op de bevestiging komen. */
 let selectedContactIds = new Set();
 
+/* Verschillende werktijden per dag.
+   scheduleMode = false: één datum/werktijd voor alle dagen
+   (zoals altijd). scheduleMode = true: een lijst met regels,
+   elk met eigen dag(en), start, eind en declarabele uren. */
+const MAX_SCHEDULE_ROWS = 6;
+
+/* A4 op 794px breed is 1123px hoog. */
+const PDF_MAX_HEIGHT = 1124;
+
+let scheduleMode = false;
+let scheduleRows = [];
+let scheduleRowCounter = 0;
+
 /* Index van het actieve item in de school-dropdown
    (voor pijltjestoetsen-navigatie). -1 = niets actief. */
 let activeDropdownIndex = -1;
@@ -1014,6 +1027,367 @@ function updatePreview() {
   setText("p-tarief", tarief);
   setText("p-contactpersoon", contactpersoon);
   setText("p-website", website);
+
+  applyScheduleToPreview();
+  checkPageFit();
+}
+
+
+/* =========================================================
+   VERSCHILLENDE WERKTIJDEN PER DAG
+   ========================================================= */
+
+function createScheduleRow(seed = {}) {
+
+  scheduleRowCounter += 1;
+
+  return {
+    id: `rij-${scheduleRowCounter}`,
+    datum: seed.datum || "",
+    start: seed.start || "",
+    eind: seed.eind || "",
+    uren: seed.uren || ""
+  };
+}
+
+
+function readSingleScheduleValues() {
+
+  const read = id =>
+    document.getElementById(id)?.value?.trim() || "";
+
+  return {
+    datum: read("datum"),
+    start: read("starttijd"),
+    eind: read("eindtijd"),
+    uren: read("uren")
+  };
+}
+
+
+/* Bouwt één klein invoerveld met een mini-label erboven. */
+function buildScheduleField(labelText, input) {
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "schedule-mini";
+
+  const label = document.createElement("span");
+  label.textContent = labelText;
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(input);
+
+  return wrapper;
+}
+
+
+function renderScheduleRows() {
+
+  const container =
+    document.getElementById("schedule-rows");
+
+  const addButton =
+    document.getElementById("schedule-add");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  scheduleRows.forEach(row => {
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "schedule-row";
+
+    /* Dag(en) */
+    const datum = document.createElement("input");
+    datum.type = "text";
+    datum.value = row.datum;
+    datum.placeholder = "Dag(en), bijv. ma 15/09";
+    datum.setAttribute("aria-label", "Dag of dagen");
+
+    datum.addEventListener("input", () => {
+      row.datum = datum.value;
+      updatePreview();
+    });
+
+    wrapper.appendChild(datum);
+
+    /* Start, eind, uren, verwijderen */
+    const times = document.createElement("div");
+    times.className = "schedule-row-times";
+
+    const start = document.createElement("input");
+    start.type = "time";
+    start.value = row.start;
+
+    start.addEventListener("input", () => {
+      row.start = start.value;
+      updatePreview();
+    });
+
+    const eind = document.createElement("input");
+    eind.type = "time";
+    eind.value = row.eind;
+
+    eind.addEventListener("input", () => {
+      row.eind = eind.value;
+      updatePreview();
+    });
+
+    const uren = document.createElement("input");
+    uren.type = "text";
+    uren.inputMode = "decimal";
+    uren.value = row.uren;
+    uren.placeholder = "6,5";
+
+    uren.addEventListener("input", () => {
+      row.uren = uren.value;
+      updatePreview();
+    });
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "remove-row";
+    remove.textContent = "×";
+    remove.title = "Verwijder deze regel";
+    remove.setAttribute("aria-label", "Verwijder deze regel");
+    remove.disabled = scheduleRows.length <= 1;
+
+    remove.addEventListener("click", () => {
+
+      scheduleRows =
+        scheduleRows.filter(candidate => candidate.id !== row.id);
+
+      renderScheduleRows();
+      updatePreview();
+    });
+
+    times.appendChild(buildScheduleField("Start", start));
+    times.appendChild(buildScheduleField("Eind", eind));
+    times.appendChild(buildScheduleField("Uren", uren));
+    times.appendChild(remove);
+
+    wrapper.appendChild(times);
+    container.appendChild(wrapper);
+
+  });
+
+  if (addButton) {
+    addButton.disabled =
+      scheduleRows.length >= MAX_SCHEDULE_ROWS;
+
+    addButton.textContent =
+      scheduleRows.length >= MAX_SCHEDULE_ROWS
+        ? `Maximaal ${MAX_SCHEDULE_ROWS} regels`
+        : "+ Dag toevoegen";
+  }
+}
+
+
+function setScheduleMode(on) {
+
+  scheduleMode = Boolean(on);
+
+  const single =
+    document.getElementById("single-schedule");
+
+  const multi =
+    document.getElementById("multi-schedule");
+
+  if (single) {
+    single.hidden = scheduleMode;
+  }
+
+  if (multi) {
+    multi.hidden = !scheduleMode;
+  }
+
+  if (scheduleMode) {
+
+    /* Eerste keer aanzetten: neem de al ingevulde
+       gegevens over als eerste regel. */
+    if (!scheduleRows.length) {
+      scheduleRows = [
+        createScheduleRow(readSingleScheduleValues())
+      ];
+    }
+
+    renderScheduleRows();
+  }
+
+  updatePreview();
+}
+
+
+function setupScheduleUI() {
+
+  const toggle =
+    document.getElementById("schedule-toggle");
+
+  const addButton =
+    document.getElementById("schedule-add");
+
+  if (toggle) {
+    toggle.addEventListener("change", () => {
+      setScheduleMode(toggle.checked);
+    });
+  }
+
+  if (addButton) {
+    addButton.addEventListener("click", () => {
+
+      if (scheduleRows.length >= MAX_SCHEDULE_ROWS) {
+        return;
+      }
+
+      /* Nieuwe regel start met dezelfde tijden als de
+         vorige: meestal wijkt maar één dag af. */
+      const previous =
+        scheduleRows[scheduleRows.length - 1];
+
+      scheduleRows.push(
+        createScheduleRow({
+          start: previous?.start,
+          eind: previous?.eind,
+          uren: previous?.uren
+        })
+      );
+
+      renderScheduleRows();
+      updatePreview();
+
+      /* Zet de cursor direct in het nieuwe dagenveld. */
+      const inputs =
+        document.querySelectorAll(
+          "#schedule-rows .schedule-row > input"
+        );
+
+      if (inputs.length) {
+        inputs[inputs.length - 1].focus();
+      }
+    });
+  }
+}
+
+
+/* Vult het rooster in de PDF-preview (of verbergt het). */
+function applyScheduleToPreview() {
+
+  const doc =
+    document.getElementById("pdf-document");
+
+  const target =
+    document.getElementById("p-schedule");
+
+  if (doc) {
+    doc.classList.toggle("multi-schedule", scheduleMode);
+  }
+
+  if (!target) {
+    return;
+  }
+
+  target.innerHTML = "";
+
+  if (!scheduleMode) {
+    return;
+  }
+
+  const addLine = (className, cells) => {
+
+    const line = document.createElement("div");
+    line.className = className;
+
+    cells.forEach(text => {
+      const cell = document.createElement("div");
+      cell.textContent = text;
+      line.appendChild(cell);
+    });
+
+    target.appendChild(line);
+  };
+
+  addLine(
+    "schedule-head",
+    ["DATUM", "WERKTIJDEN", "DECLARABELE UREN"]
+  );
+
+  const filled = scheduleRows.filter(row =>
+    row.datum.trim() || row.start || row.eind || row.uren.trim()
+  );
+
+  if (!filled.length) {
+    addLine("schedule-line", ["-", "-", "-"]);
+    return;
+  }
+
+  filled.forEach(row => {
+
+    const werktijden =
+      row.start && row.eind
+        ? `${row.start} – ${row.eind}`
+        : "-";
+
+    const uren =
+      row.uren.trim()
+        ? `${row.uren.trim()} uur`
+        : "-";
+
+    addLine(
+      "schedule-line",
+      [row.datum.trim() || "-", werktijden, uren]
+    );
+  });
+}
+
+
+/* Eerste datum, voor in de bestandsnaam. */
+function getFirstDateForFilename() {
+
+  if (scheduleMode) {
+
+    const first =
+      scheduleRows.find(row => row.datum.trim());
+
+    return first ? first.datum.trim() : "";
+  }
+
+  return (
+    document
+      .getElementById("datum")
+      ?.value
+      ?.trim() || ""
+  );
+}
+
+
+/* =========================================================
+   PAST HET OP ÉÉN PAGINA?
+   ========================================================= */
+
+function pageFits() {
+
+  const doc =
+    document.getElementById("pdf-document");
+
+  if (!doc) {
+    return true;
+  }
+
+  return doc.getBoundingClientRect().height <= PDF_MAX_HEIGHT;
+}
+
+
+function checkPageFit() {
+
+  const warning =
+    document.getElementById("fit-warning");
+
+  if (warning) {
+    warning.hidden = pageFits();
+  }
 }
 
 
@@ -1289,6 +1663,19 @@ async function downloadPDF() {
     }
 
 
+    /* Past de bevestiging niet op één pagina, dan zou het
+       onderste deel (en de footer) in de PDF verdwijnen.
+       Dan liever een duidelijke melding. */
+    if (!pageFits()) {
+
+      alert(
+        "De bevestiging past niet op één pagina. Haal een dag weg of kort de teksten in en probeer het opnieuw."
+      );
+
+      return;
+    }
+
+
     /* Bestandsnaam samenstellen:
        naam_school_functie_eerstedatum.pdf
        Zo is elke opdrachtbevestiging in de
@@ -1334,11 +1721,7 @@ async function downloadPDF() {
     }
 
 
-    let datum =
-      document
-        .getElementById("datum")
-        ?.value
-        ?.trim();
+    let datum = getFirstDateForFilename();
 
     /* Bij meerdere, komma-gescheiden data
        (bijv. "15/09, 16/09, 17/09") nemen we
@@ -1572,6 +1955,8 @@ document.addEventListener(
     setCurrentDate();
 
     setupVoorwaardenLink();
+
+    setupScheduleUI();
 
     clearSchoolInfo();
 
